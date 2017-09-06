@@ -1,0 +1,24 @@
+{
+  "name": "cg02561",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "browser-sync start --server --files \"index.html\" \"exercises/*/*.html\" \"exercises/*/*.js\" \"css/*.css\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fpegios/cg02561.git"
+  },
+  "author": "s171866",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fpegios/cg02561/issues"
+  },
+  "homepage": "https://github.com/fpegios/cg02561#readme",
+  "dependencies": {
+    "bootstrap3": "^3.3.5",
+    "browser-sync": "^2.18.13",
+    "jquery": "^3.2.1"
+  }
+}
