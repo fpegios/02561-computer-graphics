@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "browser-sync start --server --files \"index.html\" \"exercises/*/*.html\" \"exercises/*/*.js\" \"css/*.css\" "
+    "test": "browser-sync start --server --files \"index.html\" \"exercises/**/*.html\" \"exercises/**/*.js\" \"css/*.css\" "
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "dependencies": {
     "bootstrap3": "^3.3.5",
     "browser-sync": "^2.18.13",
+    "gulp": "^3.9.1",
     "jquery": "^3.2.1"
   }
 }
