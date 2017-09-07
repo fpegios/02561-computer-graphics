@@ -2,18 +2,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<title>Exercise 1.1</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Exercise 1.1</title>
 
-<script type="text/javascript" src="../lib/webgl-utils.js"></script>
-<script type="text/javascript" src="../lib/initShaders.js"></script>
-<script type="text/javascript" src="../lib/MV.js"></script>
-<script type="text/javascript" src="week01a.js"></script>
+    <link href="../node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="../lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="../lib/initShaders.js"></script>
+    <script type="text/javascript" src="../lib/MV.js"></script>
+    <script type="text/javascript" src="week01a.js"></script>
 </head>
 
-<body>
+<body onload="WebGLStart()">
+    <h2>Exercise 1 - Part 1</h2>
+
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
+
+    <div class="row" style="width: 512px">
+        <div class="col-sm-offset-2 col-sm-2">
+            <a href="/" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> HOME</a>
+        </div>
+        <div class="col-sm-offset-4 col-sm-2">
+            <a href="/exercises/week01b.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-right"></span> EX - 1.2</a>
+        </div>
+    </div>
+
+    
 </body>
 </html>

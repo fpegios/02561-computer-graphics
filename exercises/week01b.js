@@ -15,13 +15,9 @@ function initBuffer() {
 
     /*========== Defining and storing the geometry =======*/
     vertices = [
-        -0.50, 0.50, 0.00,
-         0.00, 0.50, 0.00,
-        -0.25, 0.25, 0.00,
-        
-        -2.50, 2.50, 0.00,
-        2.00, 2.50, 0.00,
-       -2.25, 2.25, 0.00
+         0.00, 0.00, 0.00,
+         1.00, 0.00, 0.00,
+         1.00, 1.00, 0.00
      ];
 
     // Create an empty buffer object to store the vertex buffer
@@ -56,7 +52,7 @@ function shaderToBuffer() {
     vPosition = gl.getAttribLocation( program, "vPosition" );
     
     // Point an attribute to the currently bound VBO
-    gl.vertexAttribPointer(vPosition, 6, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
 
     // Enable the attribute
     gl.enableVertexAttribArray(vPosition);
@@ -64,7 +60,7 @@ function shaderToBuffer() {
 
 function drawScene() {
 
-    /*============= Drawing the primitive ===============*/
+    /*============= Drawing the Scene ===============*/
 
     // Clear the canvas
     gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
@@ -79,7 +75,7 @@ function drawScene() {
     gl.viewport(0, 0, canvas.width, canvas.height);
 
     // Draw the triangle
-    gl.drawArrays(gl.POINTS, 0, 6);
+    gl.drawArrays(gl.POINTS, 0, 3);
 }
 
 function WebGLStart() {

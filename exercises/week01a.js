@@ -1,24 +1,34 @@
-"use strict";
+var canvas, gl;
 
-var gl;
+function initCanvas() {
 
-window.onload = function init()
-{
-    var canvas = document.getElementById( "gl-canvas" );
-
+    /*================ Creating a canvas =================*/
+    canvas = document.getElementById( "gl-canvas" );
+    
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { 
         alert( "WebGL isn't available" ); 
     }
+}
 
-    //  Configure WebGL
-    gl.viewport( 0, 0, canvas.width, canvas.height );
+function drawScene() {
+
+    /*============= Drawing the Scene ===============*/
+
+    // Clear the canvas
     gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
+    
+    // Enable the depth test
+    gl.enable(gl.DEPTH_TEST);
 
-    render();
-};
+    // Clear the color buffer bit
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // Set the view port
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
 
-function render() {
-    gl.clear( gl.COLOR_BUFFER_BIT );
+function WebGLStart() {
+    initCanvas();
+    drawScene(); 
 }
