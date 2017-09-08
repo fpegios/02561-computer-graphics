@@ -10,9 +10,13 @@
         attribute vec3 vPosition;
         attribute vec3 color;
         varying vec3 vColor;
+        uniform float theta;
 
         void main(void) {
-            gl_Position = vec4(vPosition, 1.0);
+            gl_Position.x = vPosition.x;
+            gl_Position.y = vPosition.y + (0.5 * cos(theta));
+            gl_Position.z = vPosition.z;
+            gl_Position.w = 1.0;
             vColor = color;
         }
     </script>

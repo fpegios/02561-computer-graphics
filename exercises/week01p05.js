@@ -13,21 +13,27 @@ function initCanvas() {
 
         /*========== Defining and storing the geometry =======*/
 
+        theta = 0.0;
         vertices = [];
         colors = [];
 
+        // Create a vertex for each degree [0, 360)
         for (var i = 0.0; i < 360; i++) {
 
+            // Convert the degrees to radians
             var j = radians(i);
 
+            // Create a temporary vertex for the current degree
             var tempVertex = [
                 Math.sin(j) / 2, Math.cos(j) / 2, 0.0
             ];
 
+            // Create temporary color array for the current vertex
             var tempColor = [
                 1, 1, 1
             ];
             
+            // Concatenate vertex and color buffer to vertices and colors
             vertices = vertices.concat(tempVertex);
             colors = colors.concat(tempColor);
         }
@@ -50,6 +56,9 @@ function initCanvas() {
     
         program = initShaders( gl, "vertex-shader", "fragment-shader" );
         gl.useProgram( program );
+
+        // make the necessary correspondence of thetaLoc with theta
+        thetaLoc = gl.getUniformLocation( program, "theta" );
     }
     
     function shaderToBuffer() {
@@ -96,6 +105,12 @@ function initCanvas() {
     
         // Set the view port
         gl.viewport(0, 0, canvas.width, canvas.height);
+
+        // Increase angle to rotate the square
+        theta += 0.05;
+        
+        // Send theta to thetaLoc (thus to the Shader)
+        gl.uniform1f(thetaLoc, theta);
 
         // Draw the triangle
         gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 3);
