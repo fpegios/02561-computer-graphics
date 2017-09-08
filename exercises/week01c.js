@@ -24,7 +24,9 @@ function initBuffer() {
         0, 0, 1     
     ];
 
-    indices = [0, 1, 2];
+    indices = [
+        0, 1, 2
+    ];
 
     // Create an empty buffer object to store the vertex buffer
     vertex_buffer = gl.createBuffer();
@@ -63,13 +65,13 @@ function shaderToBuffer() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_Buffer);
     
     // Get the attribute location
-    coordinates = gl.getAttribLocation( program, "coordinates" );
+    vPosition = gl.getAttribLocation( program, "vPosition" );
     
     // Point an attribute to the currently bound VBO
-    gl.vertexAttribPointer(coordinates, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
 
     // Enable the attribute
-    gl.enableVertexAttribArray(coordinates);
+    gl.enableVertexAttribArray(vPosition);
 
     // bind the color buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
@@ -84,7 +86,7 @@ function shaderToBuffer() {
     gl.enableVertexAttribArray(color)
 }
 
-function drawScene() {
+function render() {
 
     /*============= Drawing the Scene ===============*/
 
@@ -109,5 +111,5 @@ function WebGLStart() {
     initBuffer();
     initShader();
     shaderToBuffer();
-    drawScene(); 
+    render(); 
 }

@@ -9,7 +9,7 @@ function initCanvas() {
     }
 }
 
-function drawScene() {
+function render() {
 
     /*============= Drawing the Scene ===============*/
 
@@ -28,5 +28,5 @@ function drawScene() {
 
 function WebGLStart() {
     initCanvas();
-    drawScene(); 
+    render(); 
 }

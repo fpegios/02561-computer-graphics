@@ -47,16 +47,16 @@ function shaderToBuffer() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
     
     // Get the attribute location
-    coordinates = gl.getAttribLocation( program, "coordinates" );
+    vPosition = gl.getAttribLocation( program, "vPosition" );
     
     // Point an attribute to the currently bound VBO
-    gl.vertexAttribPointer(coordinates, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
 
     // Enable the attribute
-    gl.enableVertexAttribArray(coordinates);
+    gl.enableVertexAttribArray(vPosition);
 }
 
-function drawScene() {
+function render() {
 
     /*============= Drawing the Scene ===============*/
 
@@ -81,5 +81,5 @@ function WebGLStart() {
     initBuffer();
     initShader();
     shaderToBuffer();
-    drawScene(); 
+    render(); 
 }
