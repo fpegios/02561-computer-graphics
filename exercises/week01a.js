@@ -1,5 +1,3 @@
-var canvas, gl;
-
 function initCanvas() {
 
     /*================ Creating a canvas =================*/

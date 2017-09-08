@@ -13,22 +13,35 @@ function initBuffer() {
 
     /*========== Defining and storing the geometry =======*/
     vertices = [
-         0.00, 0.00, 0.00,
-         1.00, 0.00, 0.00,
-         1.00, 1.00, 0.00
-     ];
+        0.00, 0.00, 0.00,
+        1.00, 0.00, 0.00,
+        1.00, 1.00, 0.00
+    ];
+
+    colors = [
+        1, 0, 0, 
+        0, 1, 0, 
+        0, 0, 1     
+    ];
+
+    indices = [0, 1, 2];
 
     // Create an empty buffer object to store the vertex buffer
     vertex_buffer = gl.createBuffer();
-
-    // Bind appropriate array buffer to it
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
-    // Pass the vertex data to the buffer
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    
-    // Unbind the buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    // Create an empty buffer object and store Index data
+    index_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_Buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+    // Create an empty buffer object and store color data
+    color_buffer = gl.createBuffer ();
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 }
 
 function initShader() {
@@ -45,6 +58,9 @@ function shaderToBuffer() {
 
     // Bind vertex buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+
+    // Bind index buffer object
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_Buffer);
     
     // Get the attribute location
     coordinates = gl.getAttribLocation( program, "coordinates" );
@@ -54,6 +70,18 @@ function shaderToBuffer() {
 
     // Enable the attribute
     gl.enableVertexAttribArray(coordinates);
+
+    // bind the color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+    
+    // get the attribute location
+    var color = gl.getAttribLocation(program, "color");
+
+    // point attribute to the color buffer object
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false,0,0) ;
+
+    // enable the color attribute
+    gl.enableVertexAttribArray(color)
 }
 
 function drawScene() {
@@ -73,7 +101,7 @@ function drawScene() {
     gl.viewport(0, 0, canvas.width, canvas.height);
 
     // Draw the triangle
-    gl.drawArrays(gl.POINTS, 0, 3);
+    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);
 }
 
 function WebGLStart() {
