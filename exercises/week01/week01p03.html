@@ -5,7 +5,12 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <title>Exercise 1.3</title>
 
-    <link href="../node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="week01p03.js"></script>
+
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec3 vPosition;
         attribute vec3 color;
@@ -24,12 +29,7 @@
         void main(void) {
            gl_FragColor = vec4(vColor, 1.0);
         }
-    </script>
-
-    <script type="text/javascript" src="../lib/webgl-utils.js"></script>
-    <script type="text/javascript" src="../lib/initShaders.js"></script>
-    <script type="text/javascript" src="../lib/MV.js"></script>
-    <script type="text/javascript" src="week01p03.js"></script>
+    </script>    
 </head>
 
 <body onload="WebGLStart()">
@@ -41,10 +41,10 @@
 
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-2 col-xs-2">
-            <a href="/exercises/week01p02.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 1.2</a>
+            <a href="/exercises/week01/week01p02.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 1.2</a>
         </div>
         <div class="col-xs-offset-4 col-xs-2">
-            <a href="/exercises/week01p04.html" type="button" class="btn btn-primary">EX - 1.4 <span class="glyphicon glyphicon-menu-right"></span></a>
+            <a href="/exercises/week01/week01p04.html" type="button" class="btn btn-primary">EX - 1.4 <span class="glyphicon glyphicon-menu-right"></span></a>
         </div>
     </div>
 </body>

@@ -3,9 +3,14 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 1.4</title>
+    <title>Exercise 1.5</title>
 
-    <link href="../node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="week01p05.js"></script>
+
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec3 vPosition;
         attribute vec3 color;
@@ -13,9 +18,9 @@
         uniform float theta;
 
         void main(void) {
-            gl_Position.x = -sin(theta) * vPosition.x + cos(theta) * vPosition.y;
-            gl_Position.y = sin(theta) * vPosition.y + cos(theta) * vPosition.x;
-            gl_Position.z = 0.0;
+            gl_Position.x = vPosition.x;
+            gl_Position.y = vPosition.y + (0.5 * cos(theta));
+            gl_Position.z = vPosition.z;
             gl_Position.w = 1.0;
             vColor = color;
         }
@@ -29,15 +34,10 @@
             gl_FragColor = vec4(vColor, 1.0);
         }
     </script>
-
-    <script type="text/javascript" src="../lib/webgl-utils.js"></script>
-    <script type="text/javascript" src="../lib/initShaders.js"></script>
-    <script type="text/javascript" src="../lib/MV.js"></script>
-    <script type="text/javascript" src="week01p04.js"></script>
 </head>
 
 <body onload="WebGLStart()">
-    <h2>Exercise 1 - Part 4</h2>
+    <h2>Exercise 1 - Part 5</h2>
 
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
@@ -45,10 +45,10 @@
 
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-2 col-xs-2">
-            <a href="/exercises/week01p03.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 1.3</a>
+            <a href="/exercises/week01/week01p04.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 1.4</a>
         </div>
         <div class="col-xs-offset-4 col-xs-2">
-            <a href="/exercises/week01p05.html" type="button" class="btn btn-primary">EX - 1.5 <span class="glyphicon glyphicon-menu-right"></span></a>
+            <a href="/exercises/week02/week02p01.html" type="button" class="btn btn-primary">EX - 2.1 <span class="glyphicon glyphicon-menu-right"></span></a>
         </div>
     </div>
 </body>

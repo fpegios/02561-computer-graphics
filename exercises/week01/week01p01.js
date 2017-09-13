@@ -10,9 +10,7 @@ function initCanvas() {
 }
 
 function render() {
-
     /*============= Drawing the Scene ===============*/
-
     // Clear the canvas
     gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
     
