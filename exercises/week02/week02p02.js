@@ -1,13 +1,31 @@
+function clearCanvas() {
+    vertices = [];
+    started = false;
+}
+
+function setCanvasBgClr() {
+    selectedClr = {
+        red: r.getValue() / 255, 
+        green: g.getValue() / 255, 
+        blue: b.getValue() / 255
+    };
+}
+
+function setPointClr() {
+    pointClr = {
+        red: r.getValue() / 255, 
+        green: g.getValue() / 255, 
+        blue: b.getValue() / 255
+    };
+}
+
 function bindBuffer() {
     /*========== Defining and storing the geometry =======*/
-    // Bind appropriate array buffer to it
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
-    // Pass the vertex data to the buffer
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    
-    // Unbind the buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 }
 
 function shaderToBuffer() {
@@ -23,12 +41,24 @@ function shaderToBuffer() {
 
     // Enable the attribute
     gl.enableVertexAttribArray(vPosition);
+
+    // bind the color buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+    
+    // get the attribute location
+    color = gl.getAttribLocation(program, "color");
+
+    // point attribute to the color buffer object
+    gl.vertexAttribPointer(color, 3, gl.FLOAT, false,0,0) ;
+
+    // enable the color attribute
+    gl.enableVertexAttribArray(color)
 }
 
 function render() {
     /*============= Drawing the Scene ===============*/
     // Clear the canvas
-    gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
+    gl.clearColor( selectedClr.red, selectedClr.green, selectedClr.blue, 1.0 );
     
     // Enable the depth test
     gl.enable(gl.DEPTH_TEST);
@@ -41,6 +71,7 @@ function render() {
 
     // Draw the triangle
     if (started) {
+        // Send theta to thetaLoc (thus to the Shader)
         gl.drawArrays(gl.POINTS, 0, vertices.length/3);
     }
 
@@ -56,6 +87,23 @@ function pipeline() {
 }
 
 function WebGLStart() {
+    RGBChange = function() {
+        $('#RGB').css('background', 'rgb('+r.getValue()+','+g.getValue()+','+b.getValue()+')')
+    };
+    
+    r = $('#R').slider()
+        .on('slide', RGBChange)
+        .data('slider');
+    g = $('#G').slider()
+        .on('slide', RGBChange)
+        .data('slider');
+    b = $('#B').slider()
+        .on('slide', RGBChange)
+        .data('slider'); 
+    
+    // Set color for sample box            
+    $('#RGB').css('background', 'rgb('+r.getValue()+','+g.getValue()+','+b.getValue()+')')
+            
     /*================ Creating a canvas =================*/
     canvas = document.getElementById( "gl-canvas" );
 
@@ -64,15 +112,30 @@ function WebGLStart() {
         alert( "WebGL isn't available" ); 
     }
 
+    // Init canvas bg color
+    setCanvasBgClr();
+
+    pointClr = {
+        red: 0, 
+        green: 0, 
+        blue: 0
+    };
+
     // Vertices to draw
     vertices = [];
-    // New clicked vertex
+    // Vertices' colors
+    colors = [];
+    // New clicked vertex and color
     tempVert = [];
+    // New clicked color
+    tempColor= [];
     // After first click
     started = false;
 
     // Create an empty buffer object to store the vertex buffer
     vertex_buffer = gl.createBuffer();
+    // Create an empty buffer object and store color data
+    color_buffer = gl.createBuffer ();
 
     canvas.addEventListener("click", function() {
         if (!started) {
@@ -84,7 +147,15 @@ function WebGLStart() {
             -1 + 2 * (canvas.height - event.clientY) / canvas.height, // y
             0.00 // z
         );
-        vertices = vertices.concat(tempVert);
+        tempColor = vec3(
+            pointClr.red,
+            pointClr.green,
+            pointClr.blue
+        );
+
+        // Insert the clicke vertex on top in order to overwrite the behind possible vertex
+        vertices = tempVert.concat(vertices);
+        colors = tempColor.concat(colors);
     });
 
     /*========================= Shaders ========================*/

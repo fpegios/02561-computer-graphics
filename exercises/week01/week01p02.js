@@ -1,26 +1,4 @@
-function initCanvas() {
-
-    /*================ Creating a canvas =================*/
-    canvas = document.getElementById( "gl-canvas" );
-    
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { 
-        alert( "WebGL isn't available" ); 
-    }
-}
-
-function initBuffer() {
-
-    /*========== Defining and storing the geometry =======*/
-    vertices = [
-         0.00, 0.00, 0.00,
-         1.00, 0.00, 0.00,
-         1.00, 1.00, 0.00
-     ];
-
-    // Create an empty buffer object to store the vertex buffer
-    vertex_buffer = gl.createBuffer();
-
+function bindBuffer() {
     // Bind appropriate array buffer to it
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 
@@ -29,14 +7,6 @@ function initBuffer() {
     
     // Unbind the buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-}
-
-function initShader() {
-
-    /*========================= Shaders ========================*/
-
-    program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
 }
 
 function shaderToBuffer() {
@@ -77,9 +47,29 @@ function render() {
 }
 
 function WebGLStart() {
-    initCanvas();
-    initBuffer();
-    initShader();
+    /*================ Creating a canvas =================*/
+    canvas = document.getElementById( "gl-canvas" );
+
+    gl = WebGLUtils.setupWebGL( canvas );
+    if ( !gl ) { 
+        alert( "WebGL isn't available" ); 
+    }
+
+    /*========== Defining and storing the geometry =======*/
+    vertices = [
+        0.00, 0.00, 0.00,
+        1.00, 0.00, 0.00,
+        1.00, 1.00, 0.00
+    ];
+
+    // Create an empty buffer object to store the vertex buffer
+    vertex_buffer = gl.createBuffer();
+
+    /*========================= Shaders ========================*/
+    program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram( program );
+
+    bindBuffer();
     shaderToBuffer();
     render(); 
 }

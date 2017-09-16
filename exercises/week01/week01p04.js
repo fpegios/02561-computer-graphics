@@ -1,40 +1,5 @@
-function initCanvas() {
     
-        /*================ Creating a canvas =================*/
-        canvas = document.getElementById( "gl-canvas" );
-        
-        gl = WebGLUtils.setupWebGL( canvas );
-        if ( !gl ) { 
-            alert( "WebGL isn't available" ); 
-        }
-    }
-    
-    function initBuffer() {
-
-        theta = 0.0;
-    
-        /*========== Defining and storing the geometry =======*/
-        vertices = [
-            -0.50,  0.50, 0.00,
-             0.50,  0.50, 0.00,
-             0.50, -0.50, 0.00,
-            -0.50, -0.50, 0.00
-        ];
-    
-        colors = [
-            1, 1, 1, 
-            1, 1, 1, 
-            1, 1, 1,
-            1, 1, 1
-        ];
-    
-        indices = [
-            0, 1, 2,
-            0, 2, 3
-        ];
-    
-        // Create an empty buffer object to store the vertex buffer
-        vertex_buffer = gl.createBuffer();
+    function bindBuffer() {
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -51,21 +16,8 @@ function initCanvas() {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     }
     
-    function initShader() {
-    
-        /*========================= Shaders ========================*/
-    
-        program = initShaders( gl, "vertex-shader", "fragment-shader" );
-        gl.useProgram( program );
-
-        // make the necessary correspondence of thetaLoc with theta
-        thetaLoc = gl.getUniformLocation( program, "theta" );
-    }
-    
     function shaderToBuffer() {
-    
         /*======== Associating shaders to buffer objects ========*/
-    
         // Bind vertex buffer object
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
     
@@ -85,7 +37,7 @@ function initCanvas() {
         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
         
         // get the attribute location
-        var color = gl.getAttribLocation(program, "color");
+        color = gl.getAttribLocation(program, "color");
     
         // point attribute to the color buffer object
         gl.vertexAttribPointer(color, 3, gl.FLOAT, false,0,0) ;
@@ -95,9 +47,7 @@ function initCanvas() {
     }
     
     function render() {
-        
         /*============= Drawing the Scene ===============*/
-    
         // Clear the canvas
         gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
         
@@ -126,9 +76,48 @@ function initCanvas() {
     }
     
     function WebGLStart() {
-        initCanvas();
-        initBuffer();
-        initShader();
+        /*================ Creating a canvas =================*/
+        canvas = document.getElementById( "gl-canvas" );
+        
+        gl = WebGLUtils.setupWebGL( canvas );
+        if ( !gl ) { 
+            alert( "WebGL isn't available" ); 
+        }
+
+        /*========== Defining and storing the geometry =======*/
+        vertices = [
+            -0.50,  0.50, 0.00,
+                0.50,  0.50, 0.00,
+                0.50, -0.50, 0.00,
+            -0.50, -0.50, 0.00
+        ];
+    
+        colors = [
+            1, 1, 1, 
+            1, 1, 1, 
+            1, 1, 1,
+            1, 1, 1
+        ];
+    
+        indices = [
+            0, 1, 2,
+            0, 2, 3
+        ];
+
+        theta = 0.0;
+
+
+        // Create an empty buffer object to store the vertex buffer
+        vertex_buffer = gl.createBuffer();
+
+        /*========================= Shaders ========================*/
+        program = initShaders( gl, "vertex-shader", "fragment-shader" );
+        gl.useProgram( program );
+
+        // make the necessary correspondence of thetaLoc with theta
+        thetaLoc = gl.getUniformLocation( program, "theta" );
+
+        bindBuffer();
         shaderToBuffer();
         render(); 
     }

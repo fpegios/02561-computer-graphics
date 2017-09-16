@@ -1,14 +1,3 @@
-function initCanvas() {
-
-    /*================ Creating a canvas =================*/
-    canvas = document.getElementById( "gl-canvas" );
-    
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { 
-        alert( "WebGL isn't available" ); 
-    }
-}
-
 function render() {
     /*============= Drawing the Scene ===============*/
     // Clear the canvas
@@ -25,6 +14,13 @@ function render() {
 }
 
 function WebGLStart() {
-    initCanvas();
+    /*================ Creating a canvas =================*/
+    canvas = document.getElementById( "gl-canvas" );
+    
+    gl = WebGLUtils.setupWebGL( canvas );
+    if ( !gl ) { 
+        alert( "WebGL isn't available" ); 
+    }
+    
     render(); 
 }
