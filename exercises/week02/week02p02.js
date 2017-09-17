@@ -153,7 +153,7 @@ function WebGLStart() {
             pointClr.blue
         );
 
-        // Insert the clicke vertex on top in order to overwrite the behind possible vertex
+        // Insert the clicked vertex on top in order to overwrite the behind possible vertex
         vertices = tempVert.concat(vertices);
         colors = tempColor.concat(colors);
     });
