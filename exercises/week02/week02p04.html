@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Exercise 2.3</title>
+
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css" rel="stylesheet">
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
+    <script src="/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="week02p04.js"></script>
+    
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 vPosition;
+        attribute vec3 color;
+        varying vec3 vColor;
+
+        void main(void) {
+            gl_Position = vec4(vPosition, 1.0);
+            gl_PointSize = 20.0;
+            vColor = color;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 vColor;
+
+        void main(void) {
+            gl_FragColor = vec4(vColor, 1.0);
+        }
+    </script>
+</head>
+
+<body onload="WebGLStart()">
+    <canvas id="gl-canvas" width="512" height="512">
+        Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-8" align="center">
+            <div class="row">
+                <div class="col-xs-12" align="center">
+                    <b>R</b> 
+                    <input type="text" class="span2" value="" data-slider-min="0" data-slider-max="255" data-slider-step="1" data-slider-value="100" data-slider-id="RC" id="R" data-slider-tooltip="hide" data-slider-handle="round" />
+                </div>
+                <div class="col-xs-12" align="center">
+                    <b>G</b> 
+                    <input type="text" class="span2" value="" data-slider-min="0" data-slider-max="255" data-slider-step="1" data-slider-value="149" data-slider-id="GC" id="G" data-slider-tooltip="hide" data-slider-handle="round" />
+                </div>
+                <div class="col-xs-12" align="center">
+                    <b>B</b> 
+                    <input type="text" class="span2" value="" data-slider-min="0" data-slider-max="255" data-slider-step="1" data-slider-value="237" data-slider-id="BC" id="B" data-slider-tooltip="hide" data-slider-handle="round" />
+                </div>  
+            </div>
+        </div>
+        <div class="col-xs-4" align="center">
+            <div class="row">
+                <div class="col-xs-12" align="center">
+                    <div id="RGB"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-4" align="center">
+            <button onclick="clearCanvas();" class="btn btn-info btn-block"></span>CLEAR </button>
+        </div>
+        <div class="col-xs-4" align="center">
+            <button onclick="setCanvasBgClr();" class="btn btn-info btn-block"></span>CHANGE BG</button>
+        </div>
+        <div class="col-xs-4" align="center">
+            <button onclick="setPointClr();" class="btn btn-info btn-block"></span>CHANGE CLR</button>
+        </div>
+    </div>
+    <br/>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-4" align="center">
+            <label class="checkbox-inline"><input id="toggle-point" type="checkbox" value="" onclick="toggleMode(0);"> Point Mode</label>
+        </div>
+        <div class="col-xs-4" align="center">
+            <label class="checkbox-inline"><input id="toggle-triangle" type="checkbox" value="" onclick="toggleMode(1);"> Triangle Mode</label>
+        </div>
+        <div class="col-xs-4" align="center">
+            <label class="checkbox-inline"><input id="toggle-circle" type="checkbox" value="" onclick="toggleMode(2);"> Circle Mode</label>
+        </div>
+    </div>
+    <br/>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week02/week02p03.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 2.3</a>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <button class="btn btn-default"></span> EX - 2.4</button>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week03/week03p01.html" type="button" class="btn btn-primary">EX - 3.1 <span class="glyphicon glyphicon-menu-right"></span></a>
+        </div>
+    </div>
+</body>
+</html>
