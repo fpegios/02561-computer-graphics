@@ -207,7 +207,7 @@ function WebGLStart() {
             } else {
                 tempTriangleVert = [
                     tempVert[0], tempVert[1], tempVert[2],
-                    pointVertices[0], pointVertices[1], pointVertices[pointVertices.length - 2], 
+                    pointVertices[0], pointVertices[1], pointVertices[2], 
                     pointVertices[3], pointVertices[4], pointVertices[5] 
                 ];
 
