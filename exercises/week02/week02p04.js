@@ -5,6 +5,10 @@ function clearCanvas() {
     triangleIndices = [];
     triangleColors = [];
     triangleHeads = 0;
+    circleVertices = [];
+    circleColors = [];
+    circleClicks = 0;
+    numOfCircles = 0;
 }
 
 function setCanvasBgClr() {
@@ -35,7 +39,7 @@ function toggleMode(mode) {
     } else if (mode == 2) {
         $("#toggle-point").prop("checked", false);
         $("#toggle-triangle").prop("checked", false);
-        drawMode = 3;
+        drawMode = 2;
     }
 }
 
@@ -53,27 +57,37 @@ function initSliders() {
     $('#RGB').css('background', 'rgb('+r.getValue()+','+g.getValue()+','+b.getValue()+')')
 }
 
-function bindBuffer(mode) {
+function bindBuffer(mode, circle_i) {
     /*========== Bind Buffers =======*/
-    if (mode == "TRIANGLE_MODE") {
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_Buffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(triangleIndices), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    
-        gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleColors), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    } else if (mode == "POINT_MODE") {
+    if (mode == "POINT_MODE") {
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pointVertices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     
         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pointColors), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    } else if (mode == "TRIANGLE_MODE") {
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(triangleIndices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    
+        gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleColors), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    } else if (mode == "CIRCLE_MODE") {
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+        // Get vertices of the current (circle_i) circle
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(circleVertices.slice(circle_i * 1080, circle_i * 1080 + 1080)), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    
+        gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+        // Get colors of the current (circle_i) circle
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(circleColors.slice(circle_i * 1080, circle_i * 1080 + 1080)), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 }
@@ -83,10 +97,8 @@ function shaderToBuffer(mode) {
     // Bind vertex buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 
-    if (mode == "TRIANGLE_MODE") {
-        // Bind index buffer object
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_Buffer);
-    }
+    // Bind index buffer object
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
     
     // Get the attribute location
     vPosition = gl.getAttribLocation( program, "vPosition" );
@@ -126,11 +138,13 @@ function initViewport() {
 
 function render(mode) {
     /*============= Drawing the Scene ===============*/
-    if (mode == "TRIANGLE_MODE") {
-        gl.drawArrays(gl.TRIANGLES, 0, triangleIndices.length, gl.UNSIGNED_SHORT, 0);
-    } else if (mode == "POINT_MODE") {
+    if (mode == "POINT_MODE") {
         gl.drawArrays(gl.POINTS, 0, pointVertices.length / 3);
-    }
+    } else if (mode == "TRIANGLE_MODE") {
+        gl.drawArrays(gl.TRIANGLES, 0, triangleVertices.length / 3);
+    } else if (mode == "CIRCLE_MODE") {
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 360);
+    } 
 }
 
 function pipeline() {
@@ -145,6 +159,15 @@ function pipeline() {
         shaderToBuffer("POINT_MODE");
         render("POINT_MODE");
     } 
+
+    if (numOfCircles > 0) {
+        for (var circ_i = 0; circ_i < numOfCircles; circ_i++) {
+            bindBuffer("CIRCLE_MODE", circ_i);
+            shaderToBuffer("CIRCLE_MODE");
+            render("CIRCLE_MODE");
+        }
+        
+    }
     requestAnimFrame(pipeline);
 }
 
@@ -161,6 +184,12 @@ function WebGLStart() {
     // Init canvas bg color
     setCanvasBgClr();
 
+
+    /* INIT VARIABLES
+    ============================================================================================
+    ============================================================================================
+    */
+
     // Init point colors to black
     pointClr = {
         red: 0, 
@@ -171,11 +200,14 @@ function WebGLStart() {
     // Vertices
     pointVertices = [];
     triangleVertices = [];
+    circleVertices = [];
     // Indices
     triangleIndices = [];
     // Colors
     pointColors = [];
     triangleColors = [];
+    circleColors = [];
+    numOfCircles = 0;
     
     // New clicked vertex and color
     tempVert = [];
@@ -187,14 +219,23 @@ function WebGLStart() {
     $("#toggle-point").prop("checked", true);
     // Init the triangleHeads to zero (no heads have been drawn)
     triangleHeads = 0;
+    // Init the circleClicks to zero (no clicks for the circle)
+    circleClicks = 0;
 
     // Create an empty buffer object to store the vertex buffer
     vertex_buffer = gl.createBuffer();
     // Create an empty buffer object and store Index data
-    index_Buffer = gl.createBuffer();
+    index_buffer = gl.createBuffer();
     // Create an empty buffer object and store color data
     color_buffer = gl.createBuffer ();
 
+    /* INIT VARIABLES END
+    ============================================================================================
+    ============================================================================================
+    */
+
+
+    // Canvas click event listener
     canvas.addEventListener("click", function() {        
         // Create a temp vertex depending on the clicked coordinates
         tempVert = vec3(
@@ -256,9 +297,53 @@ function WebGLStart() {
                 triangleHeads = 0;
             }
         } else if (drawMode == 2) { // Circle mode
-            
-        }
+            if (circleClicks == 0) {
+                // Save clicked vertex and color to temp
+                pointVertices = tempVert.concat(pointVertices);
+                pointColors = tempColor.concat(pointColors);
+                circleClicks += 1;
+            } else if (circleClicks == 1) {
+                // Save clicked vertex and color to temp
+                pointVertices = tempVert.concat(pointVertices);
+                pointColors = tempColor.concat(pointColors);
+                circleClicks += 1;
 
+                // Save clicked coordiantes for sitance computation
+                x1 = pointVertices[3];
+                y1 = pointVertices[4];
+                x2 = pointVertices[0];
+                y2 = pointVertices[1];
+
+                // Calculate circle radius
+                dist = Math.sqrt( ((x1 - x2) * (x1 - x2) ) + ((y1 - y2) * (y1 - y2) ));
+                console.log(dist);
+
+                for (var i = 0.0; i < 360; i++) {
+                    // Convert the degrees to radians
+                    var j = radians(i);
+            
+                    // Create a temporary vertex for the current degree
+                    var tempCircleVert = [
+                        x1 + (dist*Math.sin(j)), y1 + (dist*Math.cos(j)), 0.0
+                    ];
+            
+                    // Create temporary color array for the current vertex
+                    tempCircleColor = [
+                        tempColor[0], tempColor[1], tempColor[2]
+                    ]
+                    
+                    // Concatenate vertex and color buffer to vertices and colors
+                    circleVertices = tempCircleVert.concat(circleVertices);
+                    circleColors = tempCircleColor.concat(circleColors);
+                }
+
+                // Pop the vertex from point vertices
+                pointVertices.shift();pointVertices.shift();pointVertices.shift();
+                pointVertices.shift();pointVertices.shift();pointVertices.shift();
+                circleClicks = 0;
+                numOfCircles += 1;
+            }             
+        }
     });
 
     /*========================= Shaders ========================*/
