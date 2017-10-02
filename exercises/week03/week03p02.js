@@ -150,9 +150,9 @@ function initViewport() {
 }
 
 //Sets + Updates matrix uniforms
-function setMatrixUniforms() {
+function setMatrixUniforms(i) {
     gl.uniformMatrix4fv(program.pMatrixUniform, false, flatten(pMatrix));
-    gl.uniformMatrix4fv(program.mvMatrixUniform, false, flatten(mvMatrix));
+    gl.uniformMatrix4fv(program.mvMatrixUniform, false, flatten(mvMatrix[i]));
 }
 
 function render() {
@@ -160,21 +160,10 @@ function render() {
     // 45 degrees Field-Of-View
     // aspect ratio gl.viewportWidth / gl.viewportHeight
     // near plane: 0.1 , far plane: 100
-    // pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    pMatrix = ortho(-5, 5, -5, 5, 0.1, 100.0);
+    pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
     // the modelview Matrix is initialized with the Identity Matrix
     mvMatrix = mat4();
-
-    // the ModelView matrix gets a global transformation ("camera" retracts 8 units)
-    // otherwise the "camera" will be inside the rotating cube
-    // z-axis points out of the screen. we translate -8 which is the inverse transform
-    // in essence we move the world -8 units to have the camera 8 units forward.
-    // REMEMBER there is no actual camera in WebGL
-    mvMatrix = translate([0.0, 0.0, -8.0]);
-
-    //a rotation connected with animation parameters
-    mvMatrix = mult(mvMatrix, rotate(degree, [1, 1, 1]));
 
     // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
@@ -191,12 +180,25 @@ function render() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     /********************************************************************/
 
-    // we update the uniforms for the shaders
-    setMatrixUniforms();
-
-    // we call the Draw Call of WebGL to draw the cube
-    // Triangles mode
-    gl.drawElements(gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    for (var i = 0; i < 3; i++){
+        // the ModelView matrix gets a global transformation ("camera" retracts 8 units)
+        // otherwise the "camera" will be inside the rotating cube
+        // z-axis points out of the screen. we translate -8 which is the inverse transform
+        // in essence we move the world -8 units to have the camera 8 units forward.
+        // REMEMBER there is no actual camera in WebGL
+        mvMatrix[i] = translate([i, 0.0, -20.0]);
+    
+        // translate the cube
+        mvMatrix[i] = translate([2, 2, -i*10 - 10]);
+        
+        // we update the uniforms for the shaders
+        setMatrixUniforms(i);
+    
+        // we call the Draw Call of WebGL to draw the cube
+        // Triangles mode
+        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
+    
 }
 
 function tick() {
