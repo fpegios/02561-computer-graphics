@@ -160,7 +160,8 @@ function render() {
     // 45 degrees Field-Of-View
     // aspect ratio gl.viewportWidth / gl.viewportHeight
     // near plane: 0.1 , far plane: 100
-    pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    // pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    pMatrix = ortho(-5, 5, -5, 5, 0.1, 100.0);
 
     // the modelview Matrix is initialized with the Identity Matrix
     mvMatrix = mat4();
