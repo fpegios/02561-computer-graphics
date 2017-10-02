@@ -195,7 +195,7 @@ function render() {
 
     // we call the Draw Call of WebGL to draw the cube
     // Triangles mode
-    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function tick() {
@@ -217,7 +217,6 @@ function WebGLStart() {
     //ModelView and Projection matrices
 	//mat4 comes from the external library
     mvMatrix = [];
-    mvMatrixStack = [];
     pMatrix = [];
 
     degree = 0;
