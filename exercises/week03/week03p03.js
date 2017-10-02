@@ -179,17 +179,21 @@ function render() {
     // we bind the buffer for the cube vertex indices
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     /********************************************************************/
-    var i = 0;
+
     for (var i = 0; i < 3; i++){
-        // the ModelView matrix gets a global transformation ("camera" retracts 8 units)
-        // otherwise the "camera" will be inside the rotating cube
-        // z-axis points out of the screen. we translate -8 which is the inverse transform
-        // in essence we move the world -8 units to have the camera 8 units forward.
-        // REMEMBER there is no actual camera in WebGL
-        mvMatrix[i] = translate([0.0, 0.0, -20.0]);
-    
-        // translate the cube
-        mvMatrix[i] = mult(mvMatrix[i], translate([5, 5, -i*10]));
+
+        ctm = mat4();
+        T = mat4();
+
+        d = vec3(0.0, 0.0, 20.0);
+
+        T = mult(T, translate([5, 5, -i*10]));
+
+        ctm = mult(ctm, T);
+
+        ctm = mult(ctm, translate(negate(d)));
+        
+        mvMatrix[i] = ctm;
 
         // we update the uniforms for the shaders
         setMatrixUniforms(i);
@@ -221,6 +225,7 @@ function WebGLStart() {
 	//mat4 comes from the external library
     mvMatrix = [];
     pMatrix = [];
+    cmt = [];
 
     degree = 0;
     tick();
