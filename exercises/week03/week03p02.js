@@ -36,40 +36,40 @@ function initBuffers() {
 
     vertices = [
         // Front face
-        -1.0, -1.0,  1.0,
-         1.0, -1.0,  1.0,
-         1.0,  1.0,  1.0,
-        -1.0,  1.0,  1.0,
+        -1.0, -1.0,  3.0,
+         1.0, -1.0,  3.0,
+         1.0,  1.0,  3.0,
+        -1.0,  1.0,  3.0,
 
         // Back face
-        -1.0, -1.0, -1.0,
-        -1.0,  1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0, -1.0, -1.0,
+        -1.0, -1.0, -3.0,
+        -1.0,  1.0, -3.0,
+         1.0,  1.0, -3.0,
+         1.0, -1.0, -3.0,
 
         // Top face
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0, -1.0,
+        -1.0,  1.0, -3.0,
+        -1.0,  1.0,  3.0,
+         1.0,  1.0,  3.0,
+         1.0,  1.0, -3.0,
 
-        // Bottom face
-        -1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-         1.0, -1.0,  1.0,
-        -1.0, -1.0,  1.0,
+        // Bottom fac
+        -1.0, -1.0, -3.0,
+         1.0, -1.0, -3.0,
+         1.0, -1.0,  3.0,
+        -1.0, -1.0,  3.0,
 
         // Right face
-         1.0, -1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,
+         1.0, -1.0, -3.0,
+         1.0,  1.0, -3.0,
+         1.0,  1.0,  3.0,
+         1.0, -1.0,  3.0,
 
         // Left face
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-        -1.0,  1.0,  1.0,
-        -1.0,  1.0, -1.0
+        -1.0, -1.0, -3.0,
+        -1.0, -1.0,  3.0,
+        -1.0,  1.0,  3.0,
+        -1.0,  1.0, -3.0
     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -179,30 +179,52 @@ function render() {
     // we bind the buffer for the cube vertex indices
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     /********************************************************************/
-    var i = 0;
-    for (var i = 0; i < 3; i++){
-        // the ModelView matrix gets a global transformation ("camera" retracts 8 units)
-        // otherwise the "camera" will be inside the rotating cube
-        // z-axis points out of the screen. we translate -8 which is the inverse transform
-        // in essence we move the world -8 units to have the camera 8 units forward.
-        // REMEMBER there is no actual camera in WebGL
-        mvMatrix[i] = translate([0.0, 0.0, -20.0]);
-    
-        // translate the cube
-        mvMatrix[i] = mult(mvMatrix[i], translate([5, 5, -i*10]));
 
-        // we update the uniforms for the shaders
-        setMatrixUniforms(i);
+    /* ONE POINT PERSPECTIVE CUBE*/
+    // camera transformation
+    mvMatrix[0] = translate([0.0, 0.0, -20.0]);
     
-        // we call the Draw Call of WebGL to draw the cube
-        // Triangles mode
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    }
+    // translate the cube
+    mvMatrix[0] = mult(mvMatrix[0], translate([0, 0, 10]));
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(0);
+
+    // we call the Draw Call of WebGL to draw the cube
+    // Triangles mode
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    /* THREE POINT PERSPECTIVE CUBE*/
+    // camera transformation
+    mvMatrix[1] = translate([0.0, 0.0, -20.0]);
     
+    // translate the cube
+    mvMatrix[1] = mult(mvMatrix[1], translate([-3, 0, 10]));
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(1);
+
+    // we call the Draw Call of WebGL to draw the cube
+    // Triangles mode
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    /* TWO POINT PERSPECTIVE CUBE*/
+    // camera transformation
+    mvMatrix[2] = translate([0.0, 0.0, -20.0]);
+    
+    // translate the cube
+    mvMatrix[2] = mult(mvMatrix[2], translate([-3, 3, 10]));
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(2);
+
+    // we call the Draw Call of WebGL to draw the cube
+    // Triangles mode
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function tick() {
-    degree++;
+    // degree++;
     initViewport()
     render();
     // requestAnimFrame(tick);
@@ -222,6 +244,6 @@ function WebGLStart() {
     mvMatrix = [];
     pMatrix = [];
 
-    degree = 0;
+    // degree = 0;
     tick();
 }
