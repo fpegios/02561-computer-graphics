@@ -36,40 +36,40 @@ function initBuffers() {
 
     vertices = [
         // Front face
-        -1.0, -1.0,  1.0,
-         1.0, -1.0,  1.0,
-         1.0,  1.0,  1.0,
-        -1.0,  1.0,  1.0,
+        -1.0, -1.0,  3.0,
+         1.0, -1.0,  3.0,
+         1.0,  1.0,  3.0,
+        -1.0,  1.0,  3.0,
 
         // Back face
-        -1.0, -1.0, -1.0,
-        -1.0,  1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0, -1.0, -1.0,
+        -1.0, -1.0, -3.0,
+        -1.0,  1.0, -3.0,
+         1.0,  1.0, -3.0,
+         1.0, -1.0, -3.0,
 
         // Top face
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0, -1.0,
+        -1.0,  1.0, -3.0,
+        -1.0,  1.0,  3.0,
+         1.0,  1.0,  3.0,
+         1.0,  1.0, -3.0,
 
-        // Bottom face
-        -1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-         1.0, -1.0,  1.0,
-        -1.0, -1.0,  1.0,
+        // Bottom fac
+        -1.0, -1.0, -3.0,
+         1.0, -1.0, -3.0,
+         1.0, -1.0,  3.0,
+        -1.0, -1.0,  3.0,
 
         // Right face
-         1.0, -1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,
+         1.0, -1.0, -3.0,
+         1.0,  1.0, -3.0,
+         1.0,  1.0,  3.0,
+         1.0, -1.0,  3.0,
 
         // Left face
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-        -1.0,  1.0,  1.0,
-        -1.0,  1.0, -1.0
+        -1.0, -1.0, -3.0,
+        -1.0, -1.0,  3.0,
+        -1.0,  1.0,  3.0,
+        -1.0,  1.0, -3.0
     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -163,7 +163,7 @@ function render() {
     pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
     // the modelview Matrix is initialized with the Identity Matrix
-    mvMatrix = mat4();
+    // mvMatrix = mat4();
 
     // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
@@ -180,28 +180,65 @@ function render() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     /********************************************************************/
 
-    for (var i = 0; i < 3; i++){
-
-        ctm = mat4();
-        T = mat4();
-
-        d = vec3(0.0, 0.0, 20.0);
-
-        T = mult(T, translate([5, 5, -i*10]));
-
-        ctm = mult(ctm, T);
-
-        ctm = mult(ctm, translate(negate(d)));
-        
-        mvMatrix[i] = ctm;
-
-        // we update the uniforms for the shaders
-        setMatrixUniforms(i);
+    /* ONE POINT PERSPECTIVE CUBE*/
+    // current transformation matrix
+    CTM[0] = mat4();
+    // camera matrix
+    d = vec3(0.0, 0.0, -20.0);
+    // translation matrix
+    T[0] = mat4();
     
-        // we call the Draw Call of WebGL to draw the cube
-        // Triangles mode
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    }
+    CTM[0] = mult(CTM[0], translate(d));
+    T[0] = mult(CTM[0], translate([0, 0, 10]));
+    CTM[0] = mult(CTM[0], T[0]);
+    CTM[0] = mult(CTM[0], translate(negate(d)));
+    mvMatrix[0] = CTM[0];
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(0);
+
+    // we call the Draw Call of WebGL to draw the cube
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    /* TWO POINT PERSPECTIVE CUBE*/
+    // current transformation matrix
+    CTM[1] = mat4();
+    // camera matrix
+    d = vec3(0.0, 0.0, -20.0);
+    // translation matrix
+    T[1] = mat4();
+    
+    CTM[1] = mult(CTM[1], translate(d));
+    T[1] = mult(CTM[1], translate([-3, 0, 10]));
+    CTM[1] = mult(CTM[1], T[1]);
+    CTM[1] = mult(CTM[1], translate(negate(d)));
+    mvMatrix[1] = CTM[1];
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(1);
+
+    // we call the Draw Call of WebGL to draw the cube
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    /* TWO POINT PERSPECTIVE CUBE*/
+    // current transformation matrix
+    CTM[2] = mat4();
+    // camera matrix
+    d = vec3(0.0, 0.0, -20.0);
+    // translation matrix
+    T[2] = mat4();
+    
+    CTM[2] = mult(CTM[2], translate(d));
+    T[2] = mult(CTM[2], translate([-3, 3, 10]));
+    CTM[2] = mult(CTM[2], T[2]);
+    CTM[2] = mult(CTM[2], translate(negate(d)));
+    mvMatrix[2] = CTM[2];
+
+    // we update the uniforms for the shaders
+    setMatrixUniforms(2);
+
+    // we call the Draw Call of WebGL to draw the cube
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     
 }
 
@@ -225,7 +262,8 @@ function WebGLStart() {
 	//mat4 comes from the external library
     mvMatrix = [];
     pMatrix = [];
-    cmt = [];
+    CTM = [];
+    T = [];
 
     degree = 0;
     tick();

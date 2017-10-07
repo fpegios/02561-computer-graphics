@@ -194,7 +194,7 @@ function render() {
     // Triangles mode
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
-    /* THREE POINT PERSPECTIVE CUBE*/
+    /* TWO POINT PERSPECTIVE CUBE*/
     // camera transformation
     mvMatrix[1] = translate([0.0, 0.0, -20.0]);
     
@@ -208,7 +208,7 @@ function render() {
     // Triangles mode
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
-    /* TWO POINT PERSPECTIVE CUBE*/
+    /* THREE POINT PERSPECTIVE CUBE*/
     // camera transformation
     mvMatrix[2] = translate([0.0, 0.0, -20.0]);
     
