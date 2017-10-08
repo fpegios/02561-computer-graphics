@@ -21,7 +21,8 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         //attributes for the vertex shader (different for every thread/core that will execute a copy of this)
         attribute vec4 vPosition;
-        varying vec4 vColor;
+
+        varying vec4 fColor;
 
         //ModelView and Projection Matrices        
         uniform mat4 modelViewMatrix;
@@ -29,7 +30,7 @@
         
         void main() {
             gl_PointSize = 1.0;
-            vColor = vec4((1.0+vPosition.xyz)/2.0, 1.0);
+            fColor = vec4((0.5 * vPosition.xyz) + 0.5, 1.0);
             gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         }
     </script>
@@ -38,15 +39,15 @@
         //necessary code for compatibility
         precision mediump float;
 
-        varying vec4 vColor;
+        varying vec4 fColor;
 
         void main() {
-            gl_FragColor = vColor;
+            gl_FragColor = fColor;
         }
     </script>
 </head>
 
-<body onload="WebGLStart()"></body>
+<body onload="WebGLStart()">
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
