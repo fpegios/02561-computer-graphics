@@ -2,6 +2,7 @@
 function initVariables() {
     numTimesToSubdivide = 0;
     index = 0;
+    degree = 0;
     pointsArray = [];
 }
 
@@ -20,6 +21,11 @@ function initViewport() {
     
     // Enable the depth test
     gl.enable(gl.DEPTH_TEST);
+
+    // Enable Culling
+    gl.enable(gl.CULL_FACE);
+
+    gl.cullFace(gl.FRONT);
 
     // the frame and depth buffers get cleaned (the depth buffer is used for sorting fragments)
     // without the depth buffer WebGL does not know which fragment is visible for a given pixel
@@ -93,6 +99,7 @@ function render() {
     projectionMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
     modelViewMatrix = translate([0.0, 0.0, -5.0]);
+    modelViewMatrix = mult(modelViewMatrix, rotate(degree, [1, 1, 1]));
     setMatrixUniforms();
 
     for( var i = 0; i < index; i += 3) {
@@ -101,6 +108,7 @@ function render() {
 }
 
 function tick() {
+    degree++;
     initViewport()
     render();
     requestAnimFrame(tick);

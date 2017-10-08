@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 4.1</title>
+    <title>Exercise 4.2</title>
 
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,12 +21,15 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         //attributes for the vertex shader (different for every thread/core that will execute a copy of this)
         attribute vec4 vPosition;
+        varying vec4 vColor;
 
         //ModelView and Projection Matrices        
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
         
         void main() {
+            gl_PointSize = 1.0;
+            vColor = vec4((1.0+vPosition.xyz)/2.0, 1.0);
             gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         }
     </script>
@@ -35,8 +38,10 @@
         //necessary code for compatibility
         precision mediump float;
 
+        varying vec4 vColor;
+
         void main() {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            gl_FragColor = vColor;
         }
     </script>
 </head>

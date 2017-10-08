@@ -2,6 +2,7 @@
 function initVariables() {
     numTimesToSubdivide = 0;
     index = 0;
+    degree = 0;
     pointsArray = [];
 }
 
@@ -93,6 +94,7 @@ function render() {
     projectionMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
     modelViewMatrix = translate([0.0, 0.0, -5.0]);
+    modelViewMatrix = mult(modelViewMatrix, rotate(degree, [1, 1, 1]));
     setMatrixUniforms();
 
     for( var i = 0; i < index; i += 3) {
@@ -101,6 +103,7 @@ function render() {
 }
 
 function tick() {
+    degree++;
     initViewport()
     render();
     requestAnimFrame(tick);
