@@ -20,21 +20,14 @@
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         //attributes for the vertex shader (different for every thread/core that will execute a copy of this)
-        attribute vec3 vPosition;
-        attribute vec3 color;
+        attribute vec4 vPosition;
 
-        //Variable to be forwarded to the corresponding thread of the fragment shader
-        varying vec3 vColor;
-
-        //ModelView and Projection Matrices
-        uniform mat4 uMVMatrix;
-        uniform mat4 uPMatrix;
+        //ModelView and Projection Matrices        
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
         
-        void main(void) {
-            //Each vertex is multiplied with the ModelView and Projection matrices and created a fragment
-            gl_Position = uPMatrix * uMVMatrix * vec4(vPosition, 1.0);
-            //Its color is forwarded to the fragment shader
-            vColor = color;
+        void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         }
     </script>
 
@@ -42,19 +35,25 @@
         //necessary code for compatibility
         precision mediump float;
 
-        //Variable coming from the vertex shader
-        varying vec3 vColor;
-
-        void main(void) {
-            gl_FragColor = vec4(vColor, 1.0);
+        void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
         }
     </script>
 </head>
 
-<body onload="WebGLStart()">
+<body onload="WebGLStart()"></body>
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-offset-1 col-xs-4" align="center">
+            <button class="btn btn-default" id = "Button5">Decrease Subdivisions</button>
+        </div>
+        <div class="col-xs-offset-1 col-xs-4" align="center">
+            <button class="btn btn-default" id = "Button4">Increase Subdivisions</button>
+        </div>
+    </div>
+    <br/>
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-2" align="center">
             <a href="/exercises/week03/week03p03.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 3.3</a>

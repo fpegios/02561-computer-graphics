@@ -162,9 +162,6 @@ function render() {
     // near plane: 0.1 , far plane: 100
     pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
-    // the modelview Matrix is initialized with the Identity Matrix
-    // mvMatrix = mat4();
-
     // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
     /************************************************/
