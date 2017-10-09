@@ -22,3 +22,9 @@
 #R, #G, #B {
 	width: 100%;
 }
+.text {
+	position: fixed;
+	top: 10px;
+	left: 550px;
+	width: 500px
+}
