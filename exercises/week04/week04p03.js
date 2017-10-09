@@ -4,22 +4,22 @@ function initVariables() {
     index = 0;
     degree = 0;
     pointsArray = [];
-    normalsArray = [];  
+    normalsArray = [];
 
-    va = vec4(0.0, 0.0, -1.0, 1);
+    va = vec4(0.0, 0.0, -1.0,1);
     vb = vec4(0.0, 0.942809, 0.333333, 1);
     vc = vec4(-0.816497, -0.471405, 0.333333, 1);
-    vd = vec4(0.816497, -0.471405, 0.333333, 1);
+    vd = vec4(0.816497, -0.471405, 0.333333,1); 
 
-    Le = vec4(1.0, 1.0, 1.0, 0.0 );
-    La = vec4(0.2, 0.2, 0.2, 1.0 );
-    Ld = vec4( 1.0, 1.0, 1.0, 1.0 );
-    Ls = vec4( 1.0, 1.0, 1.0, 1.0 );
+    lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+    lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+    lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+    lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 ); 
 
-    ka = vec4( 1.0, 0.0, 1.0, 1.0 );
-    kd = vec4( 1.0, 0.8, 0.0, 1.0 );
-    ks = vec4( 1.0, 1.0, 1.0, 1.0 );
-    a = 20.0;
+    materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+    materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+    materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+    materialShininess = 20.0;
 }
 
 function initGL() {
@@ -52,15 +52,18 @@ function initViewport() {
 }
 
 function triangle(a, b, c) {
+    var t1 = subtract(b, a);
+    var t2 = subtract(c, a);
+    var normal = normalize(cross(t2, t1));
+    normal = vec4(normal);
+
+    normalsArray.push(normal);
+    normalsArray.push(normal);
+    normalsArray.push(normal);
+
     pointsArray.push(a);
     pointsArray.push(b);
     pointsArray.push(c);
-
-    // normals are vectors
-    normalsArray.push(a[0],a[1], a[2], 0.0);
-    normalsArray.push(b[0],b[1], b[2], 0.0);
-    normalsArray.push(c[0],c[1], c[2], 0.0);
-
     index += 3;
 }
 
@@ -89,9 +92,9 @@ function tetrahedron(a, b, c, d, n) {
 }
 
 function initBuffers() {
-    ambientProduct = mult(La, ka);
-    diffuseProduct = mult(Ld, kd);
-    specularProduct = mult(Ls, ks);
+    ambientProduct = mult(lightAmbient, materialAmbient);
+    diffuseProduct = mult(lightDiffuse, materialDiffuse);
+    specularProduct = mult(lightSpecular, materialSpecular);
 
     tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
 
@@ -118,14 +121,14 @@ function initBuffers() {
     gl.uniform4fv( gl.getUniformLocation(program, "ambientProduct"), flatten(ambientProduct) );
     gl.uniform4fv( gl.getUniformLocation(program, "diffuseProduct"), flatten(diffuseProduct) );
     gl.uniform4fv( gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct) );
-    gl.uniform4fv( gl.getUniformLocation(program, "lightPosition"), flatten(Le) );
-    gl.uniform1f( gl.getUniformLocation(program, "shininess"), a );
+    gl.uniform4fv( gl.getUniformLocation(program, "lightPosition"), flatten(lightPosition) );
+    gl.uniform1f( gl.getUniformLocation(program, "shininess"), materialShininess );
 }
 
 function setMatrixUniforms() {
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
-    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );    
+    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
 }
 
 function render() {
@@ -134,16 +137,13 @@ function render() {
     // aspect ratio gl.viewportWidth / gl.viewportHeight
     // near plane: 0.1 , far plane: 100
     projectionMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-
     modelViewMatrix = translate([0.0, 0.0, -5.0]);
-    // modelViewMatrix = mult(modelViewMatrix, rotate(degree, [0, 1, 0]));
-
+    modelViewMatrix = mult(modelViewMatrix, rotate(degree, [0, 1, 0]));
     normalMatrix = [
         vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
         vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
         vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
     ];
-
     setMatrixUniforms();
 
     for( var i = 0; i < index; i += 3) {
@@ -152,7 +152,7 @@ function render() {
 }
 
 function tick() {
-    // degree += 0.15;
+    degree += 0.15;
     initViewport()
     render();
     requestAnimFrame(tick);
@@ -177,21 +177,4 @@ function WebGLStart() {
         if(numTimesToSubdivide) numTimesToSubdivide--;
         WebGLStart();
     };
-}
-
-function changeKa(axis, value) {
-    ka[axis] = value;
-    initBuffers();
-}
-function changeKd(axis, value) {
-    kd[axis] = value;
-    initBuffers();
-}
-function changeKs(axis, value) {
-    ks[axis] = value;
-    initBuffers();
-}
-function changeA(value) {
-    a = value;
-    initBuffers();
 }
