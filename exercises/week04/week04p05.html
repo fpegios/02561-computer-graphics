@@ -33,7 +33,7 @@
             if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
             else L = normalize( lightPosition.xyz - pos );
             
-            E =  -normalize(pos);
+            E =  -normalize(pos); // we are in Eye Coordinates
             N = normalize( normalMatrix*vNormal.xyz);
         
             gl_Position = projectionMatrix * modelViewMatrix * vPosition;
@@ -71,7 +71,7 @@
     </script>
 </head>
 
-<body onload="WebGLStart()"></body>
+<body onload="WebGLStart()">
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
@@ -132,7 +132,7 @@
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-11" align="center">
             <label for="slider9">Α</label>
-            <input id="slider9" type ="range" min ="0" max="100" step ="5" value ="20" oninput="changeA(this.value)"/>        
+            <input id="slider9" type ="range" min ="0" max="500" step ="5" value ="20" oninput="changeA(this.value)"/>        
         </div>
     </div>
     <br/>

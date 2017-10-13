@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 4.5</title>
+    <title>Exercise 4.6</title>
 
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,55 +11,167 @@
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
     <script src="/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
-    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
-    <script type="text/javascript" src="/lib/initShaders.js"></script>
-    <script type="text/javascript" src="/lib/MV.js"></script>
-    <script type="text/javascript" src="week04p05.js"></script>
 </head>
 
 <body>
-    
-    <div class="container">
+    <div class="container-fluid">
+        <br/>
+        <div class="row" align="center">
+            <div class="col-xs-offset-1 col-xs-2" align="center">
+                <a href="/exercises/week04/week04p05.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 4.5</a>
+            </div>
+            <div class="col-xs-offset-1 col-xs-2" align="center">
+                <button class="btn btn-default"></span> EX - 4.6</button>
+            </div>
+            <div class="col-xs-offset-1 col-xs-2" align="center">
+                <a href="/exercises/week05/week05p01.html" type="button" class="btn btn-primary">EX - 5.1 <span class="glyphicon glyphicon-menu-right"></span></a>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-xs-10">
+            <div class="col-xs-12 col-sm-6">
                 <div class="row">
-                    <!-- a -->
+                    <!-- A -->
                     <div class="col-xs-10">
-                        <h4>a. What is the difference between Phong shading and Phong lighting (the Phong reflection model)?</h4>
-                        <p class="answer">
-                            Phong shading applies the illumination model at <b>a set of points</b> and colors of the whole image.
-                            A normal vector is linearly interpolated across the surface of the polygon from the polygon's vertex normals. 
-                            The surface normal is interpolated and normalized at each pixel and lighting is computed per fragment.
-                        </p>     
-                        <p class="answer">
-                            Phong lighting determines the color of <b>a surface point</b> per vertex by simulating attributes like geometry, light sources and material properties.
-                        </p>     
+                        <h3>A. What is the difference between Phong shading and Phong lighting (the Phong reflection model)?</h3>
+                        <div class="answer">
+                            <p>
+                                <b>Phong shading</b> applies the illumination model at <b>a set of points</b> and colors of the whole image.
+                                A normal vector is linearly interpolated across the surface of the polygon from the polygon's vertex normals. 
+                                The surface normal is interpolated and normalized at each pixel and lighting is computed per fragment.
+                            </p>
+                            <p>
+                                <b>Phong lighting</b> determines the color of <b>a surface point</b> per vertex by simulating attributes like geometry, light sources and material properties.
+                            </p>
+                        </div>   
                     </div>
-                     <!-- b -->
-                     <div class="col-xs-10">
-                        <h4>b. What is the difference between flat shading, Gouraud shading, and Phong shading? List pros and cons of each.</h4>
-                        <p class="answer">
-                            <b>Flat shading</b> computes lighting values for one vertex per polygon and uses the resulting color for the entire polygon,
-                            resulting in a single flat color for every polygon. The individual polygons can be seen.
-                        </p>     
-                        <p class="answer">
-                            <b>Gouraud shading</b> computes lighting values per vertex and interpolates them over a polygon, i.e. for each fragment on
-                            the polygon, the color values from the vertices are interpolated.
-                            <br/><br/>
-                            With gouraud shading, we get visible specular highligts on vertices, but don't see much of the specular
-                            highlight if it should be on the inside of a triangle. Around the specular highlight, we see noticable poolygon
-                            edges. Specular highlights will appear to jump from vertex to vertex when moving the model, camera or light source.
-                            The quality of the specular highlights depends on the number of vertices in the model.
-                        </p>     
-                        <p class="answer">
-                            <b>Phong shading</b> interpolates the lighting parameters across the polygon and computes the lighting per fragment, not
-                            per vertex. We get good looking, round, smooth specular highlights that move smoothly along the surface as the camera,
-                            model or light moves. No visible artifacts from the polygon edges. However, more calculation are required, involving the 
-                            interpolation of the surface normal and the evaluation of the intensity function for each pixel.
-                        </p>
+                    <!-- B -->
+                    <div class="col-xs-10">
+                        <h3>B. What is the difference between flat shading, Gouraud shading, and Phong shading? List pros and cons of each?</h3>
+                        <!-- Flat Shading -->
+                        <div class="answer">
+                            <p>
+                                <b>Flat shading</b>, also called 'constant shading' and 'faceted shading' applies an illumination model once to determine a single 
+                                intensity value that is then used to shade an entire polygon, and holding the value across the polygon to reconstruct the polygon's 
+                                shade. This approach is valid if several assumptions are true:
+                                <ul>
+                                    <li>The light source is at infinity, so N.L is constant across the polygon face.</li>
+                                    <li>The viewer is at infinity, so N.V is constant across the polygon face.</li>
+                                    <li>The polygon represents the actual surface being modelled, and is not an approximation to a curved surface.</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <!-- Gouraud Shading -->
+                        <div class="answer">
+                            <p>
+                                <b>Gouraud shading</b>, also called 'intensity interpolation shading' or 'color interpolation shading', eliminates intensity 
+                                discontinuities.  Gouraud shading extends the concept of interpolated shading applied to individual polygons by interpolating 
+                                polygon vertex illumination values that take into account the surface being approximated. The Gouraud shading process requires 
+                                that the normal {perpendicular vector} be known for each vertex of the polygonal mesh.
+                            </p>
+                            <p>
+                                The next step in Gouraud shading is to find 'vertex intensities' by using the vertex normals with any desired illumination model. 
+                                Finally, each polygon is shaded by linear interpolation of vertex intensities along each edge and then between edges along each scan line.
+                            </p>
+                            <p>
+                                With gouraud shading, we get visible specular highligts on vertices, but don't see much of the specular
+                                highlight if it should be on the inside of a triangle. Around the specular highlight, we see noticable poolygon
+                                edges. Specular highlights will appear to jump from vertex to vertex when moving the model, camera or light source.
+                                The quality of the specular highlights depends on the number of vertices in the model.
+                            </p>
+                        </div>  
+                        <!-- Phong Shading -->   
+                        <div class="answer">
+                            <p>
+                                <b>Phong shading</b>, also known as 'normal-vector interpolation-shading', interpolates the surface normal vector N, 
+                                rather than the intensity. Interpolation occurs across a polygon span on a scan line, between starting and ending 
+                                normals for the span. These normals are themselves interpolated along polygon edges from vertex normals that are computed,
+                                if necessary, just as in Gouraud shading. 
+                            </p>
+                            <p>
+                                At each pixel along a scan line, the interpolated normal is normalised, and is backmapped into the WC {world coordinate} 
+                                system or one isometric to it, and a new intensity calculation is performed.
+                            </p>
+                        </div>
+                        <!-- Comparisons --> 
+                        <div class="answer">
+                            <p>
+                                <b>Note 1:</b> The implications of using flat-shading in graphics is that, for high realism and detail levels, a large number of 
+                                flat-shaded polygons is needed for a good-looking image. Models can contain millions of polygons, yet the faceted nature of the 
+                                model will still be visible in certain areas. Very high detail requires a 
+                                ridiculous number of polygons when using flat shading and as such it's not a technique that one would or should ever use for 
+                                situations which require realism. 
+                            </p>
+                            <p>
+                                Flat-shading is fast and ok for prototyping and testing, but is of little value for realistic games. Note that none of the next-gen 
+                                consoles could cope with a multi-million polygon mesh in real-time, by which I mean 25fps or higher (one would need a flat-shaded 
+                                polygon performance of about 240 million/second, which is about 200 times greater than that which even the best of the consoles can manage). 
+                                In practice, the use of texture mapping enables one to vastly reduce the number of polygons required. In the case of planetary models, 
+                                the increased realism gained from texture mapping would enable a reduction from having to use more than a million flat-shaded polygons
+                                to only a few thousand textured polygons.
+                            </p>
+                            <p>
+                                <b>Note 2:</b> Morevoer, Gouraud shading doesn't produce images as realistic as Phong shading when specular lights are involved, 
+                                but Phong shading is a much more mathematically complex task (ie. it's slower). In practice, because the new games consoles use 
+                                texture mapping anyway, the use of Phong shading would be a waste of computing resources; hence, none of the new consoles have the 
+                                ability to do Phong shading. On the other hand, all of them can do Gouraud shading; when used in combination with texture mapping, 
+                                Gouraud shading makes for good realistic scenes, though it does help considerably if good quality detailed textures are used in 
+                                the first instance.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="col-xs-12 col-sm-6">
+                <div class="row">
+                    <!-- C -->
+                    <div class="col-xs-10">
+                        <h3>C. What is the difference between a directional light and a point light?</h3>
+                        <div class="answer">
+                            <p>
+                                The main difference is that a <b>directional light</b> does not have a position. 
+                                So the rays of a directional light are all parallel, while the rays of a <b>point light</b> 
+                                radiate outwards from that point.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- D -->
+                    <div class="col-xs-10">
+                        <h3>D. Does the eye position influence the shading of an object in any way?</h3>
+                        <div class="answer">
+                            <p>
+                                Yes, the eye (camera) position influences the shading of the object as we are in eye coordinate space.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- E -->
+                    <div class="col-xs-10">
+                        <h3>E. What is the effect of setting the specular term to (0, 0, 0)?</h3>
+                        <div class="answer">
+                            <p>
+                                The specular effect is disappeared.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- F -->
+                    <div class="col-xs-10">
+                        <h3>F. What is the effect of increasing the shininess exponent(𝛼)?</h3>
+                        <div class="answer">
+                            <p>
+                                The shining effect is disappeared.
+                            </p>
+                        </div>
+                    </div>
+                    <!-- G -->
+                    <div class="col-xs-10">
+                        <h3>G. In what coordinate space did you compute the lighting?</h3>
+                        <div class="answer">
+                            <p>
+                                In eye coordinate space.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                </div>
         </div>
     </div>   
 </body>
