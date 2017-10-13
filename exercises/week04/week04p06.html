@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Exercise 4.5</title>
+
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css" rel="stylesheet">
+    
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
+    <script src="/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="week04p05.js"></script>
+</head>
+
+<body>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-10">
+                <div class="row">
+                    <!-- a -->
+                    <div class="col-xs-10">
+                        <h4>a. What is the difference between Phong shading and Phong lighting (the Phong reflection model)?</h4>
+                        <p class="answer">
+                            Phong shading applies the illumination model at <b>a set of points</b> and colors of the whole image.
+                            A normal vector is linearly interpolated across the surface of the polygon from the polygon's vertex normals. 
+                            The surface normal is interpolated and normalized at each pixel and lighting is computed per fragment.
+                        </p>     
+                        <p class="answer">
+                            Phong lighting determines the color of <b>a surface point</b> per vertex by simulating attributes like geometry, light sources and material properties.
+                        </p>     
+                    </div>
+                     <!-- b -->
+                     <div class="col-xs-10">
+                        <h4>b. What is the difference between flat shading, Gouraud shading, and Phong shading? List pros and cons of each.</h4>
+                        <p class="answer">
+                            <b>Flat shading</b> computes lighting values for one vertex per polygon and uses the resulting color for the entire polygon,
+                            resulting in a single flat color for every polygon. The individual polygons can be seen.
+                        </p>     
+                        <p class="answer">
+                            <b>Gouraud shading</b> computes lighting values per vertex and interpolates them over a polygon, i.e. for each fragment on
+                            the polygon, the color values from the vertices are interpolated.
+                            <br/><br/>
+                            With gouraud shading, we get visible specular highligts on vertices, but don't see much of the specular
+                            highlight if it should be on the inside of a triangle. Around the specular highlight, we see noticable poolygon
+                            edges. Specular highlights will appear to jump from vertex to vertex when moving the model, camera or light source.
+                            The quality of the specular highlights depends on the number of vertices in the model.
+                        </p>     
+                        <p class="answer">
+                            <b>Phong shading</b> interpolates the lighting parameters across the polygon and computes the lighting per fragment, not
+                            per vertex. We get good looking, round, smooth specular highlights that move smoothly along the surface as the camera,
+                            model or light moves. No visible artifacts from the polygon edges. However, more calculation are required, involving the 
+                            interpolation of the surface normal and the evaluation of the intensity function for each pixel.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+</body>
+</html>
