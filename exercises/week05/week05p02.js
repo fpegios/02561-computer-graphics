@@ -22,15 +22,18 @@ function WebGLStart() {
 
     // Get the storage locations of attribute and uniform variables
     a_Position = gl.getAttribLocation(program, 'a_Position');
+    a_Normal = gl.getAttribLocation(program, 'a_Normal');
     a_Color = gl.getAttribLocation(program, 'a_Color');
     u_MvpMatrix = gl.getUniformLocation(program, 'u_MvpMatrix');
+    u_NormalMatrix = gl.getUniformLocation(program, 'u_NormalMatrix');
 
-    if (a_Position < 0  || a_Color < 0 || !u_MvpMatrix) {
+    if (a_Position < 0 ||  a_Normal < 0 || a_Color < 0 ||
+        !u_MvpMatrix || !u_NormalMatrix) {
       console.log('attribute, uniform変数の格納場所の取得に失敗'); 
       return;
     }
 
-    // Prepare empty buffer objects for vertex coordinates and colors
+    // Prepare empty buffer objects for vertex coordinates, colors, and normals
     var model = initVertexBuffers();
     if (!model) {
         console.log('Failed to set the vertex information');
@@ -49,7 +52,7 @@ function WebGLStart() {
 
     // Start reading the OBJ file
     readOBJFile('/objects/teapot.obj', model, 60, true);
-
+    
     var tick = function() {   // Start drawing
         render(viewProjMatrix, model);
         requestAnimationFrame(tick);
@@ -61,9 +64,10 @@ function WebGLStart() {
 function initVertexBuffers() {
     var o = new Object(); // Utilize Object object to return multiple buffer objects
     o.vertexBuffer = createEmptyArrayBuffer(a_Position, 3, gl.FLOAT); 
+    o.normalBuffer = createEmptyArrayBuffer(a_Normal, 3, gl.FLOAT);
     o.colorBuffer = createEmptyArrayBuffer(a_Color, 4, gl.FLOAT);
     o.indexBuffer = gl.createBuffer();
-    if (!o.vertexBuffer || !o.colorBuffer || !o.indexBuffer) { return null; }
+    if (!o.vertexBuffer || !o.normalBuffer || !o.colorBuffer || !o.indexBuffer) { return null; }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -132,6 +136,11 @@ function render(viewProjMatrix, model) {
   // rotate the object
   g_modelMatrix = mult(g_modelMatrix, rotate(1, [0, 1, 0]));
 
+  // Calculate the normal transformation matrix and pass it to u_NormalMatrix
+  g_normalMatrix = inverse(g_modelMatrix);
+  g_normalMatrix = transpose(g_normalMatrix);
+  gl.uniformMatrix4fv(u_NormalMatrix, false, flatten(g_normalMatrix));
+
   // Calculate the model view project matrix and pass it to u_MvpMatrix
   g_mvpMatrix = viewProjMatrix;
   g_mvpMatrix = mult(g_mvpMatrix, g_modelMatrix);
@@ -149,6 +158,9 @@ function onReadComplete(model, objDoc) {
     // Write date into the buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.vertices, gl.STATIC_DRAW);
+  
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.normals, gl.STATIC_DRAW);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, model.colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.colors, gl.STATIC_DRAW);

@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 5.1</title>
+    <title>Exercise 5.2</title>
 
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,19 +16,24 @@
     <script type="text/javascript" src="/lib/initShaders.js"></script>
     <script type="text/javascript" src="/lib/MV.js"></script>
     <script type="text/javascript" src="/lib/OBJParser.js"></script>
-    <script type="text/javascript" src="week05p01.js"></script>
+    <script type="text/javascript" src="week05p02.js"></script>
     
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 a_Position;
         attribute vec4 a_Color;
+        attribute vec4 a_Normal;
 
         uniform mat4 u_MvpMatrix;
+        uniform mat4 u_NormalMatrix;
         varying vec4 v_Color;
 
         void main() {
+            vec3 lightDirection = vec3(-0.35, 0.35, 0.87);
             gl_Position = u_MvpMatrix * a_Position;
-            v_Color = vec4(a_Color.rgb, a_Color.a);
+            vec3 normal = normalize(vec3(u_NormalMatrix * a_Normal));
+            float nDotL = max(dot(normal, lightDirection), 0.0);
+            v_Color = vec4(a_Color.rgb * nDotL, a_Color.a);
         }
     </script>
 
@@ -49,13 +54,13 @@
     </canvas>
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week04/week04p06.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 4.6</a>
+            <a href="/exercises/week05/week05p01.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 5.1</a>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <button class="btn btn-default"></span> EX - 5.1</button>
+            <button class="btn btn-default"></span> EX - 5.2</button>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week05/week05p02.html" type="button" class="btn btn-primary">EX - 5.2 <span class="glyphicon glyphicon-menu-right"></span></a>
+            <a href="/exercises/week05/week05p03.html" type="button" class="btn btn-primary">EX - 5.3 <span class="glyphicon glyphicon-menu-right"></span></a>
         </div>
     </div>
 </body>
