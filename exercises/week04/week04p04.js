@@ -97,6 +97,7 @@ function initBuffers() {
 
     nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
+    console.log(normalsArray);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
 
     vNormal = gl.getAttribLocation( program, "vNormal" );

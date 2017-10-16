@@ -1,6 +1,15 @@
 var gl;
 var program;
 
+var Le = vec4(1.0, 1.0, 1.0, 0.0 );
+var La = vec4(0.2, 0.2, 0.2, 1.0 );
+var Ld = vec4( 1.0, 1.0, 1.0, 1.0 );
+var Ls = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+var ka = vec4( 0.0, 0.0, 0.0, 1.0 );
+var ks = vec4( 0.0, 0.0, 0.0, 1.0 );
+var a = 20.0;
+
 function WebGLStart() { 
 
     // Retrieve <canvas> element
@@ -20,11 +29,20 @@ function WebGLStart() {
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
+    ambientProduct = mult(La, ka);
+    specularProduct = mult(Ls, ks);
+
+    gl.uniform4fv( gl.getUniformLocation(program, "ambientProduct"), flatten(ambientProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program, "lightPosition"), flatten(Le) );
+    gl.uniform1f( gl.getUniformLocation(program, "shininess"), a );
+    
     // Get the storage locations of attribute and uniform variables
     a_Position = gl.getAttribLocation(program, 'a_Position');
     a_Normal = gl.getAttribLocation(program, 'a_Normal');
     a_Color = gl.getAttribLocation(program, 'a_Color');
     u_MvpMatrix = gl.getUniformLocation(program, 'u_MvpMatrix');
+    u_vMatrix = gl.getUniformLocation(program, 'u_vMatrix');
     u_NormalMatrix = gl.getUniformLocation(program, 'u_NormalMatrix');
 
     if (a_Position < 0 ||  a_Normal < 0 || a_Color < 0 ||
@@ -46,7 +64,7 @@ function WebGLStart() {
     var at = [0.0, 0.0, 0.0];
     var up = [0.0, 1.0, 0.0];
     var viewMatrix = lookAt(eye, at, up);
-
+    
     // calculate viewProjection Matrix
     var viewProjMatrix = mult(projectionMatrix, viewMatrix);
 
@@ -54,7 +72,7 @@ function WebGLStart() {
     readOBJFile('/objects/teapot.obj', model, 60, true);
     
     var tick = function() {   // Start drawing
-        render(viewProjMatrix, model);
+        render(viewMatrix, viewProjMatrix, model);
         requestAnimationFrame(tick);
       };
     tick();
@@ -120,34 +138,40 @@ function onReadOBJFile(fileString, fileName, o, scale, reverse) {
 // Coordinate transformation matrix
 var g_modelMatrix = mat4();
 var g_mvpMatrix = mat4();
-var g_normalMatrix = mat4();
+var g_normalMatrix = [];
 
 // render function
-function render(viewProjMatrix, model) {
-  if (g_objDoc != null && g_objDoc.isMTLComplete()){ // OBJ and all MTLs are available
-    g_drawingInfo = onReadComplete(model, g_objDoc);
-    g_objDoc = null;
-  }
+function render(viewMatrix, viewProjMatrix, model) {
+    if (g_objDoc != null && g_objDoc.isMTLComplete()){ // OBJ and all MTLs are available
+        g_drawingInfo = onReadComplete(model, g_objDoc);
+        g_objDoc = null;
+    }
 
-  if (!g_drawingInfo) return;   // モデルを読み込み済みか判定
+    if (!g_drawingInfo) return;   // モデルを読み込み済みか判定
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Clear color and depth buffers
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Clear color and depth buffers
 
-  // rotate the object
-  g_modelMatrix = mult(g_modelMatrix, rotate(1, [0, 1, 0]));
+    // rotate the object
+    g_modelMatrix = mult(g_modelMatrix, rotate(1, [0, 1, 0]));
 
-  // Calculate the normal transformation matrix and pass it to u_NormalMatrix
-  g_normalMatrix = inverse(g_modelMatrix);
-  g_normalMatrix = transpose(g_normalMatrix);
-  gl.uniformMatrix4fv(u_NormalMatrix, false, flatten(g_normalMatrix));
+    // Calculate the normal transformation matrix and pass it to u_NormalMatrix
+    g_normalMatrix = [
+        vec3(g_modelMatrix[0][0], g_modelMatrix[0][1], g_modelMatrix[0][2]),
+        vec3(g_modelMatrix[1][0], g_modelMatrix[1][1], g_modelMatrix[1][2]),
+        vec3(g_modelMatrix[2][0], g_modelMatrix[2][1], g_modelMatrix[2][2])
+    ];
 
-  // Calculate the model view project matrix and pass it to u_MvpMatrix
-  g_mvpMatrix = viewProjMatrix;
-  g_mvpMatrix = mult(g_mvpMatrix, g_modelMatrix);
-  gl.uniformMatrix4fv(u_MvpMatrix, false, flatten(g_mvpMatrix));
+    gl.uniformMatrix3fv(u_NormalMatrix, false, flatten(g_normalMatrix));
 
-  // Draw
-  gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
+    // Calculate the model view project matrix and pass it to u_MvpMatrix
+    g_mvpMatrix = viewProjMatrix;
+    g_mvpMatrix = mult(g_mvpMatrix, g_modelMatrix);
+    gl.uniformMatrix4fv(u_MvpMatrix, false, flatten(g_mvpMatrix));
+
+    gl.uniformMatrix4fv(u_vMatrix, false, flatten(viewMatrix));
+
+    // Draw
+    gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
 // OBJ File has been read compreatly
