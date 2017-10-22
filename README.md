@@ -1,4 +1,4 @@
-# cg02561
+# 02561-computer-graphics
 
 ## Instructions
 
