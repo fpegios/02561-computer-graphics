@@ -24,8 +24,6 @@ function initVariables() {
     colorsArray = [];
     texCoordsArray = [];
     
-    
-
     vertices = [
         vec4( -4.0, -1.0,  -1.0, 1.0 ),
         vec4(  4.0, -1.0,  -1.0, 1.0 ),

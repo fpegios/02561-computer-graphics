@@ -1,5 +1,3 @@
-
-// Initialize WebGL
 function initGL() {
     gl = WebGLUtils.setupWebGL( canvas );
     gl.viewportWidth = canvas.width;
@@ -10,62 +8,31 @@ function initGL() {
 }
 
 function initVariables() {    
-    numVertices  = 6;
-    
-    texSize = 64;
-    numChecks = 8;    
-    near = 0.3;
-    far = 3.0;
+    near = 0.1;
+    far = 30.0;
+    fovy = 90.0;
+    aspect = canvas.width / canvas.height;
 
-    fovy = 90.0;  // Field-of-view in Y direction angle (in degrees)
-    aspect = 1.0;       // Viewport aspect ratio
+    at = vec3(0, -1, -11);
+    eye = vec3(0, 2, 2);
+    up = vec3(0, 1, 0);
 
-    // texture1, texture2, texture3, texture4;
-    
-    // Create a checkerboard pattern using floats
-    image1 = new Uint8Array(4*texSize*texSize);
-        for ( i = 0; i < texSize; i++ ) {
-            for ( j = 0; j <texSize; j++ ) {
-                patchx = Math.floor(i/(texSize/numChecks));
-                patchy = Math.floor(j/(texSize/numChecks));
-                if(patchx%2 ^ patchy%2) {
-                    c = 255;
-                } else {
-                    c = 0;
-                }
-                image1[4*i*texSize+4*j] = c;
-                image1[4*i*texSize+4*j+1] = c;
-                image1[4*i*texSize+4*j+2] = c;
-                image1[4*i*texSize+4*j+3] = 255;
-            }
-        }
-    
-    
+    checkboardRows = 8;
+    checkboardColumns = 8;
+
     pointsArray = [];
     colorsArray = [];
     texCoordsArray = [];
     
-    texCoord = [
-        vec2(-1.5, 0.0),
-        vec2( 2.5, 0.0),
-        vec2( 2.5, 10.0),
-        vec2(-1.5, 10.0)
-    ];
-    
-    zmin = 1.0;
-    zmax = 50.0;
-    
     vertices = [
-        vec4( -5.5, 0.0,  zmax, 1.0 ),
-        vec4( -5.5,  0.0,  zmin, 1.0 ),
-        vec4( 5.5, 0.0,  zmin, 1.0 ),
-        vec4( 5.5,  0.0,  zmax, 1.0 ),
-    ];
+        vec4( -4.0, -1.0,  -1.0, 1.0 ),
+        vec4(  4.0, -1.0,  -1.0, 1.0 ),
+        vec4(  4.0, -1.0, -21.0, 1.0 ),
+        vec4( -4.0, -1.0, -21.0, 1.0 ),
+    ]; 
     
-    eye = vec3(0.0, 10.0, 0.0);
-    at = vec3(0.0, 0.0, (zmax+zmin)/4);
-    up = vec3(0.0, 1.0, 0.0);
-    
+    numVertices  = 6;
+
     vertexColors = [
         vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
         vec4( 1.0, 1.0, 1.0, 1.0 ),  // white
@@ -74,24 +41,62 @@ function initVariables() {
         vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
         vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
         vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-    
         vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
+    ];
+
+    texCoord = [
+        vec2(-1.5, 0.0),
+        vec2( 2.5, 0.0),
+        vec2( 2.5, 10.0),
+        vec2(-1.5, 10.0)
     ];
 }
 
-function initViewport() {
-    // Clear the canvas
-    gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
+function createCheckerboardTexture(rows, columns) {
+    texSize = rows * columns;
+    image1 = new Uint8Array(4 * texSize * texSize);
+    for ( i = 0; i < texSize; i++ ) {
+        for ( j = 0; j < texSize; j++ ) {
+            patchx = Math.floor(i / (texSize / rows));
+            patchy = Math.floor(j/( texSize / columns));
+            if(patchx%2 ^ patchy%2) {
+                c = 255;
+            } else {
+                c = 0;
+            }
+            image1[ 4 * i * texSize + 4 * j] = c;
+            image1[ 4 * i * texSize + 4 * j + 1] = c;
+            image1[ 4 * i * texSize + 4 * j + 2] = c;
+            image1[ 4 * i * texSize + 4 * j + 3] = 255;
+        }
+    }
+}
+
+function quad(a, b, c, d) {
     
-    // Enable the depth test
-    gl.enable(gl.DEPTH_TEST);
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[0]);
 
-    // the frame and depth buffers get cleaned (the depth buffer is used for sorting fragments)
-    // without the depth buffer WebGL does not know which fragment is visible for a given pixel
-    gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
+    pointsArray.push(vertices[b]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[1]);
 
-    // Set the view port
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[2]);
+
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[0]);
+
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[2]);
+
+    pointsArray.push(vertices[d]);
+    colorsArray.push(vertexColors[a]);
+    texCoordsArray.push(texCoord[3]);
 }
 
 function configureTexture(image) {
@@ -104,31 +109,11 @@ function configureTexture(image) {
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 };
 
-function quad(a, b, c, d) {
-
-     pointsArray.push(vertices[a]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[0]);
-
-     pointsArray.push(vertices[b]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[1]);
-
-     pointsArray.push(vertices[c]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[2]);
-
-     pointsArray.push(vertices[a]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[0]);
-
-     pointsArray.push(vertices[c]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[2]);
-
-     pointsArray.push(vertices[d]);
-     colorsArray.push(vertexColors[a]);
-     texCoordsArray.push(texCoord[3]);
+function initViewport() {
+    gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
+    gl.enable(gl.DEPTH_TEST);
+    gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 }
 
 function tick() {
@@ -152,6 +137,7 @@ function WebGLStart() {
 
     initGL();
     initVariables();
+    createCheckerboardTexture(checkboardRows, checkboardColumns);
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
@@ -183,8 +169,6 @@ function WebGLStart() {
     modelViewMatrixLoc = gl.getUniformLocation( program, "modelViewMatrix" );
     projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix" );
 
-    // sliders for viewing parameters
-
     document.getElementById("zFarSlider").onchange = function(event) {
         far = event.target.value;
     };
@@ -197,32 +181,37 @@ function WebGLStart() {
     document.getElementById("fovSlider").onchange = function(event) {
         fovy = event.target.value;
     };
+
     document.getElementById("Texture Style").onclick = function( event) {
         switch(event.target.index) {
             case 0:
-               gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                   gl.NEAREST_MIPMAP_NEAREST);
-               gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER,
-                    gl.NEAREST );
-               break;
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                    
+                break;
             case 1:
-               gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                    gl.NEAREST_MIPMAP_LINEAR);
-                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER,
-                    gl.LINEAR );
-               break;
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MΙΝ_FILTER, gl.LINEAR );
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+                break;
             case 2:
-                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                    gl.LINEAR_MIPMAP_NEAREST );
-                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER,
-                    gl.NEAREST );
-               break;
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST );
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_NEAREST );
+                break;
             case 3:
-                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                    gl.LINEAR_MIPMAP_LINEAR );
-                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER,
-                    gl.LINEAR );
-               break;
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+                gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+                break;
+        };
+    };
+
+    document.getElementById("Wrapping Mode").onclick = function( event) {
+        switch(event.target.index) {
+            case 0:
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                break;
+            case 1:
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                break;
         };
     };
 
