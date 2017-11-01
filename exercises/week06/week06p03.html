@@ -19,7 +19,7 @@
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         precision mediump float;
-        
+
         attribute vec4 a_position_model;
 
         varying vec4 v_position_model, v_position_camera;
@@ -43,7 +43,7 @@
         uniform vec3 u_light_camera;
 
         float atan2(float y, float x) {
-            return 2.0 * atan((length(vec2(x, y)) - x) / y);
+          return 2.0 * atan((length(vec2(x, y)) - x) / y);
         }
 
         void main() {
@@ -69,19 +69,10 @@
     </script>
 </head>
 
-<body onload="WebGLStart()">
+<body>
     <canvas id="gl-canvas" width="512" height="512">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
-    <div class="row" style="width: 512px">
-        <div class="col-xs-offset-1 col-xs-4" align="center">
-            <button class="btn btn-default" id = "Button5">Decrease Subdivisions</button>
-        </div>
-        <div class="col-xs-offset-1 col-xs-4" align="center">
-            <button class="btn btn-default" id = "Button4">Increase Subdivisions</button>
-        </div>
-    </div>
-    <br/>
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-2" align="center">
             <a href="/exercises/week06/week06p02.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 6.2</a>
