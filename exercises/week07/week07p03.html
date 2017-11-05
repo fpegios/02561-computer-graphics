@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 7.1</title>
+    <title>Exercise 7.3</title>
 
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,8 +15,7 @@
     <script type="text/javascript" src="/lib/webgl-utils.js"></script>
     <script type="text/javascript" src="/lib/initShaders.js"></script>
     <script type="text/javascript" src="/lib/MV.js"></script>
-    <script type="text/javascript" src="week07p01.js"></script>
-    
+    <script type="text/javascript" src="week07p03.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         precision mediump float;
@@ -33,9 +33,9 @@
             v_color = a_color;
             v_textureCoords = a_textureCoords;
             gl_Position = u_projection * u_modelView * a_position;
-        }        
+        }
     </script>
-
+    
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         
@@ -46,7 +46,7 @@
         
         void main() {
             gl_FragColor = texture2D(u_texture, v_textureCoords);
-        }             
+        }        
     </script>
 </head>
 
@@ -56,13 +56,13 @@
     </canvas>
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week06/week05p03.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 6.3</a>
+            <a href="/exercises/week07/week07p02.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 7.2</a>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <button class="btn btn-default"></span> EX - 7.1</button>
+            <button class="btn btn-default"></span> EX - 7.3</button>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week07/week07p02.html" type="button" class="btn btn-primary">EX - 7.2 <span class="glyphicon glyphicon-menu-right"></span></a>
+            <a href="/exercises/week07/week07p04.html" type="button" class="btn btn-primary">EX - 7.4 <span class="glyphicon glyphicon-menu-right"></span></a>
         </div>
     </div>
 </body>
