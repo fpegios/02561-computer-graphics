@@ -21,14 +21,14 @@ function initGL() {
 }
 
 function initVariables() {    
+    at = vec3(0, 0, -3);
+    eye = vec3(0, 0, 1);
+    up = vec3(0, 1, 0);
+
+    fovy = 65;
+    aspect = canvas.width / canvas.height;
     near = 0.1;
     far = 30;
-    fovy = 45;
-    aspect = canvas.width / canvas.height;
-
-    at = vec3(0, 0, -3);
-    eye = vec3(4, 4, 0);
-    up = vec3(0, 1, 0);
 
     light = vec3(0.0, 2.0, -2.0);
 
@@ -65,12 +65,17 @@ function initVariables() {
 
     projectionMatrix = perspective(fovy, aspect, near, far);
     shadowProjectionMatrix = mat4();
+
     shadowProjectionMatrix[3][3] = 0;
-    shadowProjectionMatrix[3][1] = -1 / light[1];
+    shadowProjectionMatrix[3][1] = -1/light[1];
     
     teapotFile = loadFileAJAX('teapot.obj');
     teapot = new OBJDoc('teapot.obj');
     teapot.parse(teapotFile, 0.25, false);
+
+    positions = [].concat(floor.positions);
+    textureCoords = [].concat(floor.textureCoords);
+    normals = new Array(6).fill(vec3(0, 0, 0));
 
     positions = [].concat(floor.positions);
     textureCoords = [].concat(floor.textureCoords);
@@ -207,6 +212,11 @@ function WebGLStart() {
     createTextures(gl, groundImage);
     gl.useProgram(program);
     gl.uniformMatrix4fv(programInfo.u_projection, false, flatten(projectionMatrix));
+
+    p = floor.positions[0];
+    v = normalize(cross(subtract(floor.positions[1], floor.positions[0]), subtract(floor.positions[2], floor.positions[0])));
+    R = createRMatrix(v, p);
+    console.log(R);
     
     moveTeapot = true;
     moveLight = true;
@@ -225,8 +235,8 @@ function WebGLStart() {
         phi += moveTeapot ? 0.02 : 0;
         theta += moveLight ? 0.01 : 0;
         
-        light[0] = Math.sin(theta)*2;
-        light[2] = Math.cos(theta)*2 - 2;
+        light[0] = Math.sin(theta) * 2;
+        light[2] = Math.cos(theta) * 2 - 2;
         
         depthViewMatrix = lookAt(light, at, up);
         
@@ -238,6 +248,7 @@ function WebGLStart() {
         shadowMatrix = mult(shadowMatrix, translate(-light[0], -(light[1] - 1.001), -light[2]));
         shadowMatrix = mult(shadowMatrix, teapotModelMatrix);
         
+        // DRAW INTO DEPTH TEXTURE
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
         gl.viewport(0, 0, size, size);
         gl.colorMask(false, false, false, false);
@@ -259,26 +270,8 @@ function WebGLStart() {
         gl.colorMask(true, true, true, true);
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
-        gl.useProgram(program);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.a_position.buffer);
-        gl.enableVertexAttribArray(programInfo.a_position.location);
-        gl.vertexAttribPointer(programInfo.a_position.location, 3, gl.FLOAT, false, 0, 0);
-    
-        gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.a_textureCoords.buffer);
-        gl.enableVertexAttribArray(programInfo.a_textureCoords.location);
-        gl.vertexAttribPointer(programInfo.a_textureCoords.location, 2, gl.FLOAT, false, 0, 0);    
-
-        gl.depthFunc(gl.LESS);
-        gl.uniformMatrix4fv(programInfo.u_modelView, false, flatten(viewMatrix));
-        gl.uniform1i(programInfo.u_texture, 0);
-        gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D, depthTexture);
-        gl.uniform1i(programInfo.u_shadow, 3);
-        gl.uniformMatrix4fv(programInfo.u_depthMVP, false, flatten(mult(projectionMatrix, depthViewMatrix)));
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-
+        // DRAW TEAPOT
         gl.depthFunc(gl.LESS);
         gl.useProgram(phongProgram);
 
@@ -290,11 +283,38 @@ function WebGLStart() {
         gl.enableVertexAttribArray(phongInfo.a_normal_model.location);
         gl.vertexAttribPointer(phongInfo.a_normal_model.location, 3, gl.FLOAT, false, 0, 0);
     
-        gl.uniformMatrix4fv(phongInfo.u_modelView, false, flatten(teapotModelViewMatrix));
         gl.uniformMatrix4fv(phongInfo.u_normal, false, flatten(transpose(inverse4(teapotModelViewMatrix))));
-        gl.uniform3fv(phongInfo.u_light_world, flatten(light));
         
+        gl.uniformMatrix4fv(phongInfo.u_modelView, false, flatten(teapotModelViewMatrix));
+        gl.uniform3fv(phongInfo.u_light_world, flatten(light));
         gl.drawArrays(gl.TRIANGLES, 6, positions.length - 6);
+        
+        gl.uniformMatrix4fv(phongInfo.u_modelView, false, flatten(mult(mult(viewMatrix, R), teapotModelMatrix)));
+        lightR4 = matrixVectorMult(R, vec4(light[0], light[1], light[2], 1));
+        lightR = vec3(lightR4[0], lightR4[1], lightR4[2]);
+        
+        gl.uniform3fv(phongInfo.u_light_world, flatten(lightR));
+        gl.drawArrays(gl.TRIANGLES, 6, positions.length - 6);
+
+         // DRAW PLANE
+         gl.useProgram(program);
+         
+         gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.a_position.buffer);
+         gl.enableVertexAttribArray(programInfo.a_position.location);
+         gl.vertexAttribPointer(programInfo.a_position.location, 3, gl.FLOAT, false, 0, 0);
+     
+         gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.a_textureCoords.buffer);
+         gl.enableVertexAttribArray(programInfo.a_textureCoords.location);
+         gl.vertexAttribPointer(programInfo.a_textureCoords.location, 2, gl.FLOAT, false, 0, 0);    
+         
+         gl.depthFunc(gl.LESS);
+         gl.uniformMatrix4fv(programInfo.u_modelView, false, flatten(viewMatrix));
+         gl.uniform1i(programInfo.u_texture, 0);
+         gl.activeTexture(gl.TEXTURE3);
+         gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+         gl.uniform1i(programInfo.u_shadow, 3);
+         gl.uniformMatrix4fv(programInfo.u_depthMVP, false, flatten(mult(projectionMatrix, depthViewMatrix)));
+         gl.drawArrays(gl.TRIANGLES, 0, 6);
         
         requestAnimationFrame(render);
     })
@@ -320,4 +340,26 @@ function createTextures(gl, groundImage) {
     var blackImage = new Uint8Array([0, 0, 0, 200]);
     gl.bindTexture(gl.TEXTURE_2D, blackTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, blackImage);
+}
+
+function createRMatrix(v, p) {
+    return mat4(
+        1-2*v[0]*v[0],  -2*v[0]*v[1],   -2*v[0]*v[2],   2*(dot(p, v))*v[0] ,
+        -2*v[0]*v[1],   1-2*v[1]*v[1],  -2*v[1]*v[2],   2*(dot(p, v))*v[1] ,
+        -2*v[0]*v[2],   -2*v[1]*v[2],   1-2*v[2]*v[2],  2*(dot(p, v))*v[2] ,
+        0,              0,              0,              1
+    );
+}
+
+function matrixVectorMult(A, x) {
+    var Ax = [];
+    for (var i = 0; i < x.length; i++) {
+        var sum = 0;
+        for (var j = 0; j < x.length; j++) {
+            sum += A[j][i] * x[i];
+        }
+        Ax.push(sum);
+    }
+    // AND MY
+    return Ax;
 }

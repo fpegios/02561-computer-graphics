@@ -240,7 +240,7 @@ function WebGLStart() {
         
         depthViewMatrix = lookAt(light, at, up);
         
-        var teapotModelMatrix = translate(0, - 0.75 - 0.25 * Math.sin(phi), -3);
+        var teapotModelMatrix = translate(0, 0, -3);
         var teapotModelViewMatrix = mult(viewMatrix, teapotModelMatrix);
         
         var shadowMatrix = mult(viewMatrix, translate(light[0], light[1] - 1.001, light[2]));

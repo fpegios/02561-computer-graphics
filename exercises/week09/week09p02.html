@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <title>Exercise 8.1</title>
+    <title>Exercise 9.2</title>
 
     <link href="/css/styles.css" rel="stylesheet">
     <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,7 +15,7 @@
     <script type="text/javascript" src="/lib/initShaders.js"></script>
     <script type="text/javascript" src="/lib/MV.js"></script>
     <script type="text/javascript" src="/lib/OBJParser.js"></script>
-    <script type="text/javascript" src="week08p02.js"></script>
+    <script type="text/javascript" src="week09p02.js"></script>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
         precision mediump float;
@@ -33,7 +33,7 @@
             v_textureCoords = a_textureCoords;
             v_position = u_depthMVP * a_position;
             gl_Position = u_projection * u_modelView * a_position;
-        }                      
+        }                                  
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -53,9 +53,9 @@
                 shadow = 0.5;
             }
             vec4 color = texture2D(u_texture, v_textureCoords) * shadow;
-            color.a = 1.0;
+            color.a = 0.8;
             gl_FragColor = color;
-        }
+        }              
     </script>
 
     <script id="phong-vertex-shader" type="x-shader/x-vertex">
@@ -64,9 +64,8 @@
         attribute vec3 a_position_model, a_normal_model;
         
         varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
-        varying vec4 v_position_depth;
         
-        uniform mat4 u_normal, u_modelView, u_projection, u_depthMVP;
+        uniform mat4 u_normal, u_modelView, u_projection;
         uniform vec3 u_light_world;
         
         void main() {
@@ -74,19 +73,15 @@
             v_light_camera = (u_modelView * vec4(u_light_world, 0)).xyz;
             v_eye_camera = position_camera;
             v_normal_camera = (u_normal * vec4(a_normal_model, 0)).xyz;
-            v_position_depth = vec4(a_position_model, 1.0) * u_depthMVP;
             
             gl_Position = u_projection * u_modelView * vec4(a_position_model, 1.0);
-        }        
+        }
     </script>
 
     <script id="phong-fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         
         varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
-        varying vec4 v_position_depth;
-        
-        uniform sampler2D u_shadow;
         
         void main() {
             vec3 n = normalize(v_normal_camera);
@@ -110,16 +105,9 @@
             if (cosAngle < 0.0) {
                 specular = vec3(0.0);
             }
-            
-            vec3 depth = (v_position_depth.xyz / (v_position_depth.w)) * 0.5 + 0.5;
-            float shadowValue = texture2D(u_shadow, depth.xy).r;
-            float shadow = 1.0;
-            if (shadowValue < depth.z) {
-                shadow = 0.5;
-            }
         
-            gl_FragColor = vec4((ambient + diffuse + specular), 1.0) * shadow;
-        }                                  
+            gl_FragColor = vec4((ambient + diffuse + specular), 1.0);
+        }
     </script>
 
     <script id="depth-vertex-shader" type="x-shader/x-vertex">
@@ -135,7 +123,7 @@
             vec4 position_camera = u_projection * u_modelView * a_position;
             v_position_camera = position_camera; 
             gl_Position = position_camera;
-        }                
+        }                      
     </script>
 
     <script id="depth-fragment-shader" type="x-shader/x-fragment">
@@ -146,7 +134,7 @@
         void main() {
             float z = normalize(v_position_camera).z;
             gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-        }                                        
+        }                                               
     </script>
 </head>
 
@@ -156,13 +144,13 @@
     </canvas>
     <div class="row" style="width: 512px">
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week08/week08p01.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 8.1</a>
+            <a href="/exercises/week09/week09p01.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 9.1</a>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <button class="btn btn-default"></span> EX - 8.2</button>
+            <button class="btn btn-default"></span> EX - 9.2</button>
         </div>
         <div class="col-xs-offset-1 col-xs-2" align="center">
-            <a href="/exercises/week09/week09p01.html" type="button" class="btn btn-primary">EX - 9.1 <span class="glyphicon glyphicon-menu-right"></span></a>
+            <a href="/exercises/week09/week09p03.html" type="button" class="btn btn-primary">EX - 9.3 <span class="glyphicon glyphicon-menu-right"></span></a>
         </div>
     </div>
     <br/>
