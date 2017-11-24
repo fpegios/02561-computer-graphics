@@ -85,14 +85,16 @@ function WebGLStart() {
         },
         u_mvp: gl.getUniformLocation(program, 'u_mvp'),
         u_mtex: gl.getUniformLocation(program, 'u_mtex'),
-        u_texture: gl.getUniformLocation(program, 'u_texture')
+        u_texture: gl.getUniformLocation(program, 'u_texture'),
+        u_eye_world: gl.getUniformLocation(program, 'u_eye_world'),
+        u_reflective: gl.getUniformLocation(program, 'u_reflective')
     };
 
     gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.a_position.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
     
     cubeTexture = createCubeTexture(gl, images);
-
+    
     requestAnimationFrame(function render() {
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -104,11 +106,16 @@ function WebGLStart() {
         gl.enableVertexAttribArray(programInfo.a_position.location);
         gl.vertexAttribPointer(programInfo.a_position.location, 3, gl.FLOAT, false, 0, 0);
 
+        gl.uniform3fv(programInfo.u_eye_world, flatten(eye));
+        
         gl.uniformMatrix4fv(programInfo.u_mvp, false, flatten(mat4()));
         gl.uniformMatrix4fv(programInfo.u_mtex, false, flatten(mult(inverse4(viewMatrix), inverse4(projectionMatrix))));
+        gl.uniform1i(programInfo.u_reflective, false);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        
         gl.uniformMatrix4fv(programInfo.u_mvp, false, flatten(mult(projectionMatrix, viewMatrix)));
         gl.uniformMatrix4fv(programInfo.u_mtex, false, flatten(mat4()));
+        gl.uniform1i(programInfo.u_reflective, true);
         gl.drawArrays(gl.TRIANGLES, 6, positions.length - 6);
         
         requestAnimationFrame(render);
