@@ -392,8 +392,7 @@ function update() {
             } else {
                 arrowAngle = arrowAngle + arrowDirection;
             }
-        }
-        if (gameState == gameStates.POWERING) {
+        } else if (gameState == gameStates.POWERING) {
             if (powerbarValue >= powerbarScaleRange.max) {
                 powerbarDirection = -powerbarDirection;
                 powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
@@ -403,6 +402,8 @@ function update() {
             } else {
                 powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
             }
+        } else if (gameState == gameStates.AIRTIME) {
+            ball.z -= 1.0; 
         }
                 
         initViewport()
@@ -446,7 +447,7 @@ document.addEventListener("keydown", function(event) {
         switch(gameState) {
             case gameStates.AIMING:
                 if (arrowAngle >= 0) {
-                    shoot.horizontalAngle = arrowAngle;
+                    shoot.horizontalAngle = arrowAngle * (Math.PI / 180);
                     shoot.side = -1;
                 } else {
                     shoot.horizontalAngle = -arrowAngle;
@@ -455,7 +456,7 @@ document.addEventListener("keydown", function(event) {
                 gameState = gameStates.POWERING;
                 break;
             case gameStates.POWERING:
-                shoot.verticalAngle = (powerbarValue / powerbarScaleRange.max) * 10;
+                shoot.verticalAngle = ((powerbarValue / powerbarScaleRange.max) * 10) * (Math.PI / 180)  ;
                 console.log(shoot);
                 gameState = gameStates.AIRTIME;
                 break;
