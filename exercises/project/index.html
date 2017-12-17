@@ -19,10 +19,10 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         //attributes for the vertex shader (different for every thread/core that will execute a copy of this)
         attribute vec3 vPosition;
-        attribute vec3 color;
+        uniform vec4 color;
 
         //Variable to be forwarded to the corresponding thread of the fragment shader
-        varying vec3 vColor;
+        varying vec4 vColor;
 
         //ModelView and Projection Matrices
         uniform mat4 uMVMatrix;
@@ -41,10 +41,10 @@
         precision mediump float;
 
         //Variable coming from the vertex shader
-        varying vec3 vColor;
+        varying vec4 vColor;
 
         void main(void) {
-            gl_FragColor = vec4(vColor, 1.0);
+            gl_FragColor = vColor;
         }
     </script>
 </head>

@@ -122,6 +122,7 @@ function WebGLStart() {
     tick();
     document.getElementById("Button4").onclick = function(){
         numTimesToSubdivide++;
+        console.log(numTimesToSubdivide);
         index = 0;
         pointsArray = [];
         initBuffers();
