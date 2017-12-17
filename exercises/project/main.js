@@ -11,10 +11,8 @@ function initVariables() {
     mvMatrix = [];
     pMatrix = [];
     cameraParams = {x: 0, y: -5.0, z: -20};
-
-    // boolean flags
-    arrowIsVisible = true;
-    powerbarIsVisible = true;
+    gameStates = { AIMING: "AIMING", POWERING: "POWERING", AIRTIME: "AIRTIME", COLLISION: "COLLISION"};
+    gameState = gameStates.AIMING;
 
     // ball
     index = 0;
@@ -33,7 +31,7 @@ function initVariables() {
     targetRange = {minX: -28, maxX: 27, minY: -12, maxY: 9};
 
     // arrow
-    degree = 0;
+    arrowAngle = 0;
     arrowDirection = 1; // 1: right and -1: left
     arrow = {x: 0, y: 1.3, z: 9};
     arrowMaxDegrees = 45;
@@ -41,12 +39,14 @@ function initVariables() {
     // powerbar
     powerbarDirection = 1;
     powerbarScale = {x: 1.25, y: 0.075, z: 1};
-    powerbarScaleDynamic = 0.005;
+    powerbarValue = 0.005;
     powerbarStep = 0.01;
     powerbar = {x: 0, y: -1, z: 9};
     powerbarScaleRange = {min: 0.005, max: 1.25};
 
-    
+    // shoot
+    shoot = {horizontalAngle: 0, verticalAngle: 0, side: -1}; // side: -1 --> left.... side: 1 --> right
+
     // colors
     white =    [1.0, 1.00, 1.0, 1.0];
     red =      [1.0, 0.00, 0.0, 1.0];
@@ -332,7 +332,7 @@ function drawArrow() {
     /********************************************************************/
 
     mvMatrix[5] = camera;
-    mvMatrix[5] = mult(mvMatrix[5], rotate(degree, [0, 0, 1]));
+    mvMatrix[5] = mult(mvMatrix[5], rotate(arrowAngle, [0, 0, 1]));
     mvMatrix[5] = mult(mvMatrix[5], translate([arrow.x, arrow.y, arrow.z]));
     setMatrixUniforms(5, green);
     gl.drawElements(gl.TRIANGLES, arrowIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -350,7 +350,7 @@ function drawPowerBar() {
     
     mvMatrix[5] = camera;
     mvMatrix[5] = mult(mvMatrix[5], translate([powerbar.x, powerbar.y, powerbar.z]));
-    mvMatrix[5] = mult(mvMatrix[5], scalem([powerbarScaleDynamic, powerbarScale.y, powerbarScale.z]));
+    mvMatrix[5] = mult(mvMatrix[5], scalem([powerbarValue, powerbarScale.y, powerbarScale.z]));
     setMatrixUniforms(5, red);
 
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -369,40 +369,45 @@ function render() {
     drawBall();
     drawGoalPost();    
     drawTargets();
-    if (arrowIsVisible) {
+    if (gameState == gameStates.AIMING) {
         drawArrow();
     }
-    if (powerbarIsVisible) {
+    if (gameState == gameStates.POWERING) {
         drawPowerBar();
     }
 }
 
-function tick() {
+function update() {
+
     if (ball.z > target.z + 1 ) {
         // ball.z -= 1.0;
-        if (degree == arrowMaxDegrees) {
-            arrowDirection = -arrowDirection;
-            degree = degree + arrowDirection;
-        } else if (degree == -arrowMaxDegrees) {
-            arrowDirection = -arrowDirection;
-            degree = degree + arrowDirection;
-        } else {
-            degree = degree + arrowDirection;
-        }
 
-        if (powerbarScaleDynamic >= powerbarScaleRange.max) {
-            powerbarDirection = -powerbarDirection;
-            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
-        } else if (powerbarScaleDynamic < powerbarScaleRange.min) {
-            powerbarDirection = -powerbarDirection;
-            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
-        } else {
-            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
+        if (gameState == gameStates.AIMING) {
+            if (arrowAngle == arrowMaxDegrees) {
+                arrowDirection = -arrowDirection;
+                arrowAngle = arrowAngle + arrowDirection;
+            } else if (arrowAngle == -arrowMaxDegrees) {
+                arrowDirection = -arrowDirection;
+                arrowAngle = arrowAngle + arrowDirection;
+            } else {
+                arrowAngle = arrowAngle + arrowDirection;
+            }
+        }
+        if (gameState == gameStates.POWERING) {
+            if (powerbarValue >= powerbarScaleRange.max) {
+                powerbarDirection = -powerbarDirection;
+                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+            } else if (powerbarValue < powerbarScaleRange.min) {
+                powerbarDirection = -powerbarDirection;
+                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+            } else {
+                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+            }
         }
                 
         initViewport()
         render();
-        requestAnimFrame(tick);
+        requestAnimFrame(update);
     } else {
         if ( (ball.x >= target.x - 2) && ( ball.x <= target.x + 2) && (ball.y >= target.y - 2) && ( ball.y <= target.y + 2)) {
             console.log("TARGET HIT!");
@@ -432,7 +437,32 @@ function WebGLStart() {
     initSquareBuffer();
     initArrowBuffer()
     
-    defineTarget();
-    
-    tick();
+    defineTarget();    
+    update();
 }
+
+document.addEventListener("keydown", function(event) {
+    if (event.which == 32) {
+        switch(gameState) {
+            case gameStates.AIMING:
+                if (arrowAngle >= 0) {
+                    shoot.horizontalAngle = arrowAngle;
+                    shoot.side = -1;
+                } else {
+                    shoot.horizontalAngle = -arrowAngle;
+                    shoot.side = 1;
+                }
+                gameState = gameStates.POWERING;
+                break;
+            case gameStates.POWERING:
+                shoot.verticalAngle = (powerbarValue / powerbarScaleRange.max) * 10;
+                console.log(shoot);
+                gameState = gameStates.AIRTIME;
+                break;
+            case gameStates.COLLISION:
+                gameState = gameStates.AIMING;
+                break;
+            default:
+        }
+    }
+})      
