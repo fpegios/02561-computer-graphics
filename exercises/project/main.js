@@ -7,16 +7,15 @@ function initGL() {
     }
 }
 
-function initVariables() {
-    degree = 0;
-    ballZ = 5;
+function initVariables() {    
     mvMatrix = [];
     pMatrix = [];
 
-    // sphere
+    // ball
     index = 0;
     numTimesToSubdivide = 6;
     pointsArray = [];
+    ball = {x: 0, y: 0, z:0 };
 
     // goalPost
     goalPostZ = -90;
@@ -24,14 +23,19 @@ function initVariables() {
     crossbarScaleWidth = 1.25;
     crossbarScaleHeight = 15;
 
+    // target
+    target1 = {x: -2, y: -2};
+    target2 = {x: 0, y: 0};
+    target3 = {x: 0, y: 0};
+    targetZ = -90;
+    
+    // colors
     white = [1.0, 1.0, 1.0, 1.0];
     red =   [1.0, 0.0, 0.0, 1.0];
     blue =  [0.0, 0.0, 1.0, 1.0];
     green = [0.0, 1.0, 0.0, 1.0];
     black = [0.0, 0.0, 0.0, 1.0];
 }
-
-
 
 function initCubeBuffer() {
     cubeVertexPositionBuffer = gl.createBuffer();
@@ -104,6 +108,36 @@ function initCubeBuffer() {
     cubeVertexIndexBuffer.numItems = 36;
 }
 
+function initSquare() {
+    squareVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
+
+    squareVertices = [
+        // Front face
+        -2.0, -2.0,  1.0,
+         2.0, -2.0,  1.0,
+         2.0,  2.0,  1.0,
+        -2.0,  2.0,  1.0
+    ]
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareVertices), gl.STATIC_DRAW);
+
+    squareVertexBuffer.itemSize = 3;
+    squareVertexBuffer.numItems = 4;
+    squareIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);
+
+    var squareVertexIndices = [
+        0, 1, 2,      
+        0, 2, 3
+    ];
+
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(squareVertexIndices), gl.STATIC_DRAW);
+    
+    squareIndexBuffer.itemSize = 1;
+    squareIndexBuffer.numItems = 6;
+}
+
 function triangle(a, b, c) {
     pointsArray.push(a);
     pointsArray.push(b);
@@ -160,9 +194,27 @@ function setMatrixUniforms(i, color) {
     gl.uniform4fv(colorLoc, color);
 }
 
-function drawGoalPost(camera) {
-    
+function drawBall() {
+    // BIND BUFFERS!!!!!!!!!!!!
+    // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
+    /************************************************/
+    gl.bindBuffer( gl.ARRAY_BUFFER, sphereVertexBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray( vPosition);
+    /************************************************/
 
+    mvMatrix[3] = camera;
+    mvMatrix[3] = mult(mvMatrix[3], translate([ball.x, ball.y, ball.z]));
+    mvMatrix[3] = mult(mvMatrix[3], scalem([0.75, 0.75, 0.75]));
+
+    setMatrixUniforms(3, white);
+    for( var i = 0; i < index; i += 3) {
+        gl.drawArrays( gl.TRIANGLES, i, 3 );  
+    }
+}
+
+function drawGoalPost() {
     // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
     /************************************************/
@@ -195,44 +247,44 @@ function drawGoalPost(camera) {
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawBall(camera) {
-    mvMatrix[3] = camera;
-    mvMatrix[3] = mult(mvMatrix[3], translate([0, 0, ballZ]));
-    mvMatrix[3] = mult(mvMatrix[3], scalem([0.75, 0.75, 0.75]));
-
-    // BIND BUFFERS!!!!!!!!!!!!
+function drawTargets() {
+     // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
     /************************************************/
-    gl.bindBuffer( gl.ARRAY_BUFFER, sphereVertexBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
+    gl.vertexAttribPointer(vPosition, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray( vPosition);
-    /************************************************/
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);
+    /********************************************************************/
 
-    setMatrixUniforms(3, white);
-    for( var i = 0; i < index; i += 3) {
-        gl.drawArrays( gl.TRIANGLES, i, 3 );  
-    }
+    mvMatrix[4] = camera;
+    mvMatrix[4] = mult(mvMatrix[4], translate([target1.x, target1.y, targetZ]));
+    setMatrixUniforms(4, red);
+    gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function render() {
     pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 150.0);
-    var camera = translate([0.0, -5.0, -20.0]);
+    camera = translate([0.0, -5.0, -20.0]);
     
-    drawBall(camera);
-    drawGoalPost(camera);    
+    drawBall();
+    drawGoalPost();    
+    drawTargets();
 }
 
 function tick() {
-    if (ballZ >= goalPostZ) {
-        // ballZ -= 0.5;
+    if (ball.z > targetZ + 1 ) {
+        ball.z -= 1.0;
+        initViewport()
+        render();
+        requestAnimFrame(tick);
     } else {
-        // alert("GOAL!");
+        if ( (ball.x >= target1.x - 2) && ( ball.x <= target1.x + 2) && (ball.y >= target1.y - 2) && ( ball.y <= target1.y + 2)) {
+            console.log("TARGET HIT!");
+        } else {
+            console.log("OUT OF TARGET!");
+        }
     }
-    
-    initViewport()
-    render();
-    requestAnimFrame(tick);
 }
 
 function WebGLStart() {    
@@ -252,6 +304,7 @@ function WebGLStart() {
 
     initSphereBuffer();
     initCubeBuffer();
+    initSquare();
     
     tick();
 }
