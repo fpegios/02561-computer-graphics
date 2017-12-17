@@ -12,14 +12,18 @@ function initVariables() {
     pMatrix = [];
     cameraParams = {x: 0, y: -5.0, z: -20};
 
+    // boolean flags
+    arrowIsVisible = true;
+    powerbarIsVisible = true;
+
     // ball
     index = 0;
     numTimesToSubdivide = 6;
     pointsArray = [];
-    ball = {x: 0, y: 0, z: 5 };
+    ball = {x: 0, y: 0, z: 9 };
 
     // goalPost
-    goalPostZ = -90;
+    goalPostZ = -100;
     goalPostWidth = 65;
     crossbarScaleWidth = 1.25;
     crossbarScaleHeight = 15;
@@ -31,14 +35,26 @@ function initVariables() {
     // arrow
     degree = 0;
     arrowDirection = 1; // 1: right and -1: left
-    arrow = {x: 0, y: 1.2, z: 5};
+    arrow = {x: 0, y: 1.3, z: 9};
+    arrowMaxDegrees = 45;
+
+    // powerbar
+    powerbarDirection = 1;
+    powerbarScale = {x: 1.25, y: 0.075, z: 1};
+    powerbarScaleDynamic = 0.005;
+    powerbarStep = 0.01;
+    powerbar = {x: 0, y: -1, z: 9};
+    powerbarScaleRange = {min: 0.005, max: 1.25};
+
     
     // colors
-    white = [1.0, 1.0, 1.0, 1.0];
-    red =   [1.0, 0.0, 0.0, 1.0];
-    blue =  [0.0, 0.0, 1.0, 1.0];
-    green = [0.0, 1.0, 0.0, 1.0];
-    black = [0.0, 0.0, 0.0, 1.0];
+    white =    [1.0, 1.00, 1.0, 1.0];
+    red =      [1.0, 0.00, 0.0, 1.0];
+    orange =   [1.0, 0.35, 0.0, 1.0];
+    yellow =   [1.0, 0.80, 0.0, 1.0];
+    blue =     [0.0, 0.00, 1.0, 1.0];
+    green =    [0.0, 1.00, 0.0, 1.0];
+    black =    [0.0, 0.00, 0.0, 1.0];
 }
 
 function initCubeBuffer() {
@@ -223,7 +239,7 @@ function initSphereBuffer() {
 }
 
 function defineTarget() {
-    target = {x: (Math.random() * (targetRange.maxX - targetRange.minX + 1)) + targetRange.minX, y: (Math.random() * (targetRange.maxY - targetRange.minY + 1)) + targetRange.minY, z: -90};
+    target = {x: (Math.random() * (targetRange.maxX - targetRange.minX + 1)) + targetRange.minX, y: (Math.random() * (targetRange.maxY - targetRange.minY + 1)) + targetRange.minY, z: goalPostZ};
 }
 
 function initViewport() {
@@ -322,30 +338,68 @@ function drawArrow() {
     gl.drawElements(gl.TRIANGLES, arrowIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
+function drawPowerBar() {
+    // BIND BUFFERS!!!!!!!!!!!!
+    // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
+    /************************************************/
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
+    gl.vertexAttribPointer(vPosition, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray( vPosition);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);
+    /********************************************************************/
+    
+    mvMatrix[5] = camera;
+    mvMatrix[5] = mult(mvMatrix[5], translate([powerbar.x, powerbar.y, powerbar.z]));
+    mvMatrix[5] = mult(mvMatrix[5], scalem([powerbarScaleDynamic, powerbarScale.y, powerbarScale.z]));
+    setMatrixUniforms(5, red);
+
+    gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvMatrix[6] = camera;
+    mvMatrix[6] = mult(mvMatrix[6], translate([powerbar.x, powerbar.y, powerbar.z]));
+    mvMatrix[6] = mult(mvMatrix[6], scalem([powerbarScale.x, powerbarScale.y, powerbarScale.z]));
+    setMatrixUniforms(6, yellow);
+    gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
 function render() {
     pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 150.0);
-    camera = translate([cameraParams.x, cameraParams.y, cameraParams.z]);
+    camera = rotate(10, [1, 0, 0]);
+    camera = mult(camera, translate([cameraParams.x, cameraParams.y, cameraParams.z]));
     
     drawBall();
     drawGoalPost();    
     drawTargets();
-    drawArrow();
+    if (arrowIsVisible) {
+        drawArrow();
+    }
+    if (powerbarIsVisible) {
+        drawPowerBar();
+    }
 }
 
 function tick() {
     if (ball.z > target.z + 1 ) {
         // ball.z -= 1.0;
-        if (degree == 60) {
+        if (degree == arrowMaxDegrees) {
             arrowDirection = -arrowDirection;
             degree = degree + arrowDirection;
-        } else if (degree == -60) {
+        } else if (degree == -arrowMaxDegrees) {
             arrowDirection = -arrowDirection;
             degree = degree + arrowDirection;
         } else {
             degree = degree + arrowDirection;
         }
-        
-        
+
+        if (powerbarScaleDynamic >= powerbarScaleRange.max) {
+            powerbarDirection = -powerbarDirection;
+            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
+        } else if (powerbarScaleDynamic < powerbarScaleRange.min) {
+            powerbarDirection = -powerbarDirection;
+            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
+        } else {
+            powerbarScaleDynamic = powerbarScaleDynamic + (powerbarDirection * powerbarStep);
+        }
+                
         initViewport()
         render();
         requestAnimFrame(tick);
