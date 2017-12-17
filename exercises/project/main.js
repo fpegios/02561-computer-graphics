@@ -10,6 +10,7 @@ function initGL() {
 function initVariables() {    
     mvMatrix = [];
     pMatrix = [];
+    cameraParams = {x: 0, y: -5.0, z: -20};
 
     // ball
     index = 0;
@@ -26,6 +27,11 @@ function initVariables() {
     // target
     target = {x: 0, y: 0, z: 0};
     targetRange = {minX: -28, maxX: 27, minY: -12, maxY: 9};
+
+    // arrow
+    degree = 0;
+    arrowDirection = 1; // 1: right and -1: left
+    arrow = {x: 0, y: 1.2, z: 5};
     
     // colors
     white = [1.0, 1.0, 1.0, 1.0];
@@ -136,6 +142,43 @@ function initSquareBuffer() {
     squareIndexBuffer.numItems = 6;
 }
 
+function initArrowBuffer() {
+    arrowVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, arrowVertexBuffer);
+
+    arrowVertices = [
+        // triangle
+         0.00,  1.0,  1.0,
+        -0.35,  0.35,  1.0,
+         0.00,  0.35,  1.0,
+         0.35,  0.35,  1.0,
+        // main body
+        -0.15,  0.35,  1.0,
+         0.15,  0.35,  1.0,
+        -0.15,  0.00,  1.0,
+         0.15,  0.00,  1.0
+    ]
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arrowVertices), gl.STATIC_DRAW);
+
+    arrowVertexBuffer.itemSize = 3;
+    arrowVertexBuffer.numItems = 8;
+    arrowIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, arrowIndexBuffer);
+
+    var arrowVertexIndices = [
+        0, 1, 2,      
+        0, 2, 3,
+        4, 5, 6,
+        5, 6, 7
+    ];
+
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(arrowVertexIndices), gl.STATIC_DRAW);
+    
+    arrowIndexBuffer.itemSize = 1;
+    arrowIndexBuffer.numItems = 12;
+}
+
 function triangle(a, b, c) {
     pointsArray.push(a);
     pointsArray.push(b);
@@ -230,27 +273,24 @@ function drawGoalPost() {
     mvMatrix[0] = camera;
     mvMatrix[0] = mult(mvMatrix[0], translate([-goalPostWidth / 2, 0, goalPostZ]));
     mvMatrix[0] = mult(mvMatrix[0], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
-    mvMatrix[0] = mult(mvMatrix[0], rotate(0, [1, 1, 1]));
     setMatrixUniforms(0, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[1] = camera;
     mvMatrix[1] = mult(mvMatrix[1], translate([goalPostWidth / 2, 0, goalPostZ]));
     mvMatrix[1] = mult(mvMatrix[1], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
-    mvMatrix[1] = mult(mvMatrix[1], rotate(0, [1, 1, 1]));
     setMatrixUniforms(1, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[2] = camera;
     mvMatrix[2] = mult(mvMatrix[2], translate([0, crossbarScaleHeight - 1.25, goalPostZ]));
     mvMatrix[2] = mult(mvMatrix[2], scalem([goalPostWidth / 2, crossbarScaleWidth, 0.25]));
-    mvMatrix[2] = mult(mvMatrix[2], rotate(0, [1, 1, 1]));
     setMatrixUniforms(2, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function drawTargets() {
-     // BIND BUFFERS!!!!!!!!!!!!
+    // BIND BUFFERS!!!!!!!!!!!!
     // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
     /************************************************/
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
@@ -265,18 +305,47 @@ function drawTargets() {
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
+function drawArrow() {
+    // BIND BUFFERS!!!!!!!!!!!!
+    // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
+    /************************************************/
+    gl.bindBuffer(gl.ARRAY_BUFFER, arrowVertexBuffer);
+    gl.vertexAttribPointer(vPosition, arrowVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray( vPosition);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, arrowIndexBuffer);
+    /********************************************************************/
+
+    mvMatrix[5] = camera;
+    mvMatrix[5] = mult(mvMatrix[5], rotate(degree, [0, 0, 1]));
+    mvMatrix[5] = mult(mvMatrix[5], translate([arrow.x, arrow.y, arrow.z]));
+    setMatrixUniforms(5, green);
+    gl.drawElements(gl.TRIANGLES, arrowIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
 function render() {
     pMatrix = perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 150.0);
-    camera = translate([0.0, -5.0, -20.0]);
+    camera = translate([cameraParams.x, cameraParams.y, cameraParams.z]);
     
     drawBall();
     drawGoalPost();    
     drawTargets();
+    drawArrow();
 }
 
 function tick() {
     if (ball.z > target.z + 1 ) {
         // ball.z -= 1.0;
+        if (degree == 60) {
+            arrowDirection = -arrowDirection;
+            degree = degree + arrowDirection;
+        } else if (degree == -60) {
+            arrowDirection = -arrowDirection;
+            degree = degree + arrowDirection;
+        } else {
+            degree = degree + arrowDirection;
+        }
+        
+        
         initViewport()
         render();
         requestAnimFrame(tick);
@@ -307,6 +376,7 @@ function WebGLStart() {
     initSphereBuffer();
     initCubeBuffer();
     initSquareBuffer();
+    initArrowBuffer()
     
     defineTarget();
     
