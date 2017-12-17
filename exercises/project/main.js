@@ -15,7 +15,7 @@ function initVariables() {
     index = 0;
     numTimesToSubdivide = 6;
     pointsArray = [];
-    ball = {x: 0, y: 0, z:0 };
+    ball = {x: 0, y: 0, z: 5 };
 
     // goalPost
     goalPostZ = -90;
@@ -24,10 +24,8 @@ function initVariables() {
     crossbarScaleHeight = 15;
 
     // target
-    target1 = {x: -2, y: -2};
-    target2 = {x: 0, y: 0};
-    target3 = {x: 0, y: 0};
-    targetZ = -90;
+    target = {x: 0, y: 0, z: 0};
+    targetRange = {minX: -28, maxX: 27, minY: -12, maxY: 9};
     
     // colors
     white = [1.0, 1.0, 1.0, 1.0];
@@ -108,7 +106,7 @@ function initCubeBuffer() {
     cubeVertexIndexBuffer.numItems = 36;
 }
 
-function initSquare() {
+function initSquareBuffer() {
     squareVertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
 
@@ -179,6 +177,10 @@ function initSphereBuffer() {
     sphereVertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, sphereVertexBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+}
+
+function defineTarget() {
+    target = {x: (Math.random() * (targetRange.maxX - targetRange.minX + 1)) + targetRange.minX, y: (Math.random() * (targetRange.maxY - targetRange.minY + 1)) + targetRange.minY, z: -90};
 }
 
 function initViewport() {
@@ -258,7 +260,7 @@ function drawTargets() {
     /********************************************************************/
 
     mvMatrix[4] = camera;
-    mvMatrix[4] = mult(mvMatrix[4], translate([target1.x, target1.y, targetZ]));
+    mvMatrix[4] = mult(mvMatrix[4], translate([target.x, target.y, target.z]));
     setMatrixUniforms(4, red);
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
@@ -273,13 +275,13 @@ function render() {
 }
 
 function tick() {
-    if (ball.z > targetZ + 1 ) {
-        ball.z -= 1.0;
+    if (ball.z > target.z + 1 ) {
+        // ball.z -= 1.0;
         initViewport()
         render();
         requestAnimFrame(tick);
     } else {
-        if ( (ball.x >= target1.x - 2) && ( ball.x <= target1.x + 2) && (ball.y >= target1.y - 2) && ( ball.y <= target1.y + 2)) {
+        if ( (ball.x >= target.x - 2) && ( ball.x <= target.x + 2) && (ball.y >= target.y - 2) && ( ball.y <= target.y + 2)) {
             console.log("TARGET HIT!");
         } else {
             console.log("OUT OF TARGET!");
@@ -304,7 +306,9 @@ function WebGLStart() {
 
     initSphereBuffer();
     initCubeBuffer();
-    initSquare();
+    initSquareBuffer();
+    
+    defineTarget();
     
     tick();
 }
