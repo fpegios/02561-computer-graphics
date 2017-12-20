@@ -28,7 +28,7 @@ function initVariables() {
 
     // target
     target = {x: 0, y: 0, z: 0};
-    targetRange = {minX: -28, maxX: 27, minY: -12, maxY: 9};
+    targetRange = {minX: -28, maxX: 27, minY: 0, maxY: 21};
 
     // arrow
     arrowAngle = 0;
@@ -45,8 +45,17 @@ function initVariables() {
     powerbarScaleRange = {min: 0.005, max: 1.25};
 
     // shoot
-    shoot = {horizontalAngle: 0, verticalAngle: 0, side: -1}; // side: -1 --> left.... side: 1 --> right
-
+    shoot = {
+        horizontalCurve: 0, 
+        horizontalStep: 0, 
+        horizontalMax: 36,
+        verticalCurve: 0, 
+        verticalStep: 0, 
+        verticalMax: 22,
+        distance: ball.z - goalPostZ,
+        speed: 2.0 
+    }; 
+    
     // colors
     white =    [1.0, 1.00, 1.0, 1.0];
     red =      [1.0, 0.00, 0.0, 1.0];
@@ -287,19 +296,19 @@ function drawGoalPost() {
 
     // draw the three parts of a goalpost (left, right, top)
     mvMatrix[0] = camera;
-    mvMatrix[0] = mult(mvMatrix[0], translate([-goalPostWidth / 2, 0, goalPostZ]));
+    mvMatrix[0] = mult(mvMatrix[0], translate([-goalPostWidth / 2, 12, goalPostZ]));
     mvMatrix[0] = mult(mvMatrix[0], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
     setMatrixUniforms(0, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[1] = camera;
-    mvMatrix[1] = mult(mvMatrix[1], translate([goalPostWidth / 2, 0, goalPostZ]));
+    mvMatrix[1] = mult(mvMatrix[1], translate([goalPostWidth / 2, 12, goalPostZ]));
     mvMatrix[1] = mult(mvMatrix[1], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
     setMatrixUniforms(1, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[2] = camera;
-    mvMatrix[2] = mult(mvMatrix[2], translate([0, crossbarScaleHeight - 1.25, goalPostZ]));
+    mvMatrix[2] = mult(mvMatrix[2], translate([0, (crossbarScaleHeight - 1.25) + 12  , goalPostZ]));
     mvMatrix[2] = mult(mvMatrix[2], scalem([goalPostWidth / 2, crossbarScaleWidth, 0.25]));
     setMatrixUniforms(2, white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -380,7 +389,6 @@ function render() {
 function update() {
 
     if (ball.z > target.z + 1 ) {
-        // ball.z -= 1.0;
 
         if (gameState == gameStates.AIMING) {
             if (arrowAngle == arrowMaxDegrees) {
@@ -403,8 +411,13 @@ function update() {
                 powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
             }
         } else if (gameState == gameStates.AIRTIME) {
-            ball.z -= 1.0; 
-        }
+            
+            ball = {
+                x: ball.x + shoot.horizontalStep,
+                y: ball.y + shoot.verticalStep,
+                z: ball.z - shoot.speed
+            }
+          }
                 
         initViewport()
         render();
@@ -447,16 +460,17 @@ document.addEventListener("keydown", function(event) {
         switch(gameState) {
             case gameStates.AIMING:
                 if (arrowAngle >= 0) {
-                    shoot.horizontalAngle = arrowAngle * (Math.PI / 180);
-                    shoot.side = -1;
+                    shoot.horizontalCurve = arrowAngle / arrowMaxDegrees;
+                    shoot.horizontalStep = -(shoot.horizontalCurve * shoot.horizontalMax) / (shoot.distance / shoot.speed);
                 } else {
-                    shoot.horizontalAngle = -arrowAngle;
-                    shoot.side = 1;
+                    shoot.horizontalCurve = arrowAngle / arrowMaxDegrees;
+                    shoot.horizontalStep = -(shoot.horizontalCurve * shoot.horizontalMax) / (shoot.distance / shoot.speed);
                 }
                 gameState = gameStates.POWERING;
                 break;
             case gameStates.POWERING:
-                shoot.verticalAngle = ((powerbarValue / powerbarScaleRange.max) * 10) * (Math.PI / 180)  ;
+                shoot.verticalCurve = (powerbarValue / powerbarScaleRange.max);
+                shoot.verticalStep = (shoot.verticalCurve * shoot.verticalMax) / shoot.distance;
                 console.log(shoot);
                 gameState = gameStates.AIRTIME;
                 break;
