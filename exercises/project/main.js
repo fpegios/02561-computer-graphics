@@ -28,19 +28,21 @@ function initVariables() {
 
     // target
     target = {x: 0, y: 0, z: 0};
-    targetRange = {minX: -28, maxX: 27, minY: 0, maxY: 21};
+    targetScale = 2;
+    targetRange = {minX: -25 - targetScale, maxX: 25 + targetScale, minY: 0 + targetScale , maxY: 18 + targetScale };
 
     // arrow
     arrowAngle = 0;
     arrowDirection = 1; // 1: right and -1: left
     arrow = {x: 0, y: 1.3, z: 9};
+    arrowAngleStep = 2;
     arrowMaxDegrees = 45;
 
     // powerbar
     powerbarDirection = 1;
     powerbarScale = {x: 1.25, y: 0.075, z: 1};
     powerbarValue = 0.005;
-    powerbarStep = 0.01;
+    powerbarStep = 0.05;
     powerbar = {x: 0, y: -1, z: 9};
     powerbarScaleRange = {min: 0.005, max: 1.25};
 
@@ -51,10 +53,13 @@ function initVariables() {
         horizontalMax: 36,
         verticalCurve: 0, 
         verticalStep: 0, 
-        verticalMax: 22,
+        verticalMax: 30 ,
         distance: ball.z - goalPostZ,
-        speed: 2.0 
+        speed: 3.0 
     }; 
+
+    // score
+    score = 0;
     
     // colors
     white =    [1.0, 1.00, 1.0, 1.0];
@@ -326,6 +331,7 @@ function drawTargets() {
 
     mvMatrix[4] = camera;
     mvMatrix[4] = mult(mvMatrix[4], translate([target.x, target.y, target.z]));
+    mvMatrix[4] = mult(mvMatrix[4], scalem([targetScale, targetScale, 1 ]));
     setMatrixUniforms(4, red);
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
@@ -386,49 +392,92 @@ function render() {
     }
 }
 
+function increaseScore() {
+    score++;
+    document.getElementById("score").innerHTML = score;
+}
+
+function initForNextShoot() {
+    gameState = gameStates.AIMING;
+
+    ball = {x: 0, y: 0, z: 9 }; 
+
+    arrowDirection = 1;
+    arrowAngle = 0;
+    powerbarDirection
+    powerbarValue = 0.006 ;
+}
+
+function ballHasReachedGoalPost() {
+    return (ball.z <=  target.z + 1 );
+}
+
+function ballOnTarget() {
+    return (ball.x >= target.x - 2*targetScale) && ( ball.x <= target.x + 2*targetScale) && (ball.y >= target.y - 2*targetScale) && ( ball.y <= target.y + 2*targetScale);
+}
+
+function updateArrow() {
+    if (arrowAngle >= arrowMaxDegrees) {
+        arrowDirection = -arrowDirection;
+        arrowAngle = arrowAngle + arrowDirection*arrowAngleStep ;
+    } else if (arrowAngle <= -arrowMaxDegrees) {
+        arrowDirection = -arrowDirection;
+        arrowAngle = arrowAngle + arrowDirection*arrowAngleStep;
+    } else {
+        arrowAngle = arrowAngle + arrowDirection*arrowAngleStep;
+    }
+}
+
+function updatePowerbar() {
+    if (powerbarValue >= powerbarScaleRange.max) {
+        powerbarDirection = -powerbarDirection;
+        powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+    } else if (powerbarValue < powerbarScaleRange.min) {
+        powerbarDirection = -powerbarDirection;
+        powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+    } else {
+        powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
+    }
+}
+
+function updateBall() {
+    ball = {
+        x: ball.x + shoot.horizontalStep,
+        y: ball.y + shoot.verticalStep,
+        z: ball.z - shoot.speed
+    }
+}
+
+function gameOver() {
+    score = 0;
+    document.getElementById("score").innerHTML = score;
+}
+
 function update() {
 
-    if (ball.z > target.z + 1 ) {
-
-        if (gameState == gameStates.AIMING) {
-            if (arrowAngle == arrowMaxDegrees) {
-                arrowDirection = -arrowDirection;
-                arrowAngle = arrowAngle + arrowDirection;
-            } else if (arrowAngle == -arrowMaxDegrees) {
-                arrowDirection = -arrowDirection;
-                arrowAngle = arrowAngle + arrowDirection;
-            } else {
-                arrowAngle = arrowAngle + arrowDirection;
-            }
-        } else if (gameState == gameStates.POWERING) {
-            if (powerbarValue >= powerbarScaleRange.max) {
-                powerbarDirection = -powerbarDirection;
-                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
-            } else if (powerbarValue < powerbarScaleRange.min) {
-                powerbarDirection = -powerbarDirection;
-                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
-            } else {
-                powerbarValue = powerbarValue + (powerbarDirection * powerbarStep);
-            }
-        } else if (gameState == gameStates.AIRTIME) {
-            
-            ball = {
-                x: ball.x + shoot.horizontalStep,
-                y: ball.y + shoot.verticalStep,
-                z: ball.z - shoot.speed
-            }
-          }
-                
-        initViewport()
-        render();
-        requestAnimFrame(update);
-    } else {
-        if ( (ball.x >= target.x - 2) && ( ball.x <= target.x + 2) && (ball.y >= target.y - 2) && ( ball.y <= target.y + 2)) {
-            console.log("TARGET HIT!");
+    if ( ballHasReachedGoalPost() ) {
+        if ( ballOnTarget() ) {
+            increaseScore();
+            initForNextShoot();
+            defineTarget();  
         } else {
-            console.log("OUT OF TARGET!");
+            gameOver(); 
+            initForNextShoot();
+            defineTarget();  
+        }        
+    } else {
+        if (gameState == gameStates.AIMING) {
+            updateArrow();            
+        } else if (gameState == gameStates.POWERING) {
+            updatePowerbar();
+        } else if (gameState == gameStates.AIRTIME) {
+            updateBall();            
         }
     }
+
+    initViewport()
+    render();
+    requestAnimFrame(update);
 }
 
 function WebGLStart() {    
@@ -436,6 +485,7 @@ function WebGLStart() {
     canvas = document.getElementById( "gl-canvas" );
     initGL();
     initVariables();
+    document.getElementById("score").innerHTML = score;
     
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
@@ -470,8 +520,7 @@ document.addEventListener("keydown", function(event) {
                 break;
             case gameStates.POWERING:
                 shoot.verticalCurve = (powerbarValue / powerbarScaleRange.max);
-                shoot.verticalStep = (shoot.verticalCurve * shoot.verticalMax) / shoot.distance;
-                console.log(shoot);
+                shoot.verticalStep = (shoot.verticalCurve * shoot.verticalMax) / ( shoot.distance / shoot.speed);
                 gameState = gameStates.AIRTIME;
                 break;
             case gameStates.COLLISION:

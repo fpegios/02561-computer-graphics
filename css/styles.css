@@ -31,3 +31,20 @@
 .answer {
 	margin-left: 20px;
 }
+
+@font-face {
+	font-family: Badaboom;
+	src: url(../fonts/Badaboom.ttf);
+}
+
+#score {
+	background-color: red;
+	border-radius: 100%;
+	position: fixed;
+	left: 20px;
+	top: 20px;
+	font-family: Badaboom;
+	font-size: 4em;
+	padding: 0.0em 0.4em;
+	color: black;
+}
