@@ -36,7 +36,7 @@ function initVariables() {
     arrowDirection = 1; // 1: right and -1: left
     arrow = {x: 0, y: 1.3, z: 9};
     arrowAngleStep = 2;
-    arrowMaxDegrees = 45;
+    arrowMaxDegrees = 35;
 
     // powerbar
     powerbarDirection = 1;
@@ -50,7 +50,7 @@ function initVariables() {
     shoot = {
         horizontalCurve: 0, 
         horizontalStep: 0, 
-        horizontalMax: 36,
+        horizontalMax: 0, 
         verticalCurve: 0, 
         verticalStep: 0, 
         verticalMax: 30 ,
@@ -404,7 +404,7 @@ function initForNextShoot() {
 
     arrowDirection = 1;
     arrowAngle = 0;
-    powerbarDirection
+    powerbarDirection = 1;
     powerbarValue = 0.006 ;
 }
 
@@ -509,12 +509,12 @@ document.addEventListener("keydown", function(event) {
     if (event.which == 32) {
         switch(gameState) {
             case gameStates.AIMING:
-                if (arrowAngle >= 0) {
-                    shoot.horizontalCurve = arrowAngle / arrowMaxDegrees;
-                    shoot.horizontalStep = -(shoot.horizontalCurve * shoot.horizontalMax) / (shoot.distance / shoot.speed);
+                if (arrowAngle >= 0) { 
+                    shoot.horizontalMax = -arrowAngle;
+                    shoot.horizontalStep = shoot.horizontalMax / (shoot.distance / shoot.speed);
                 } else {
-                    shoot.horizontalCurve = arrowAngle / arrowMaxDegrees;
-                    shoot.horizontalStep = -(shoot.horizontalCurve * shoot.horizontalMax) / (shoot.distance / shoot.speed);
+                    shoot.horizontalMax = -arrowAngle;
+                    shoot.horizontalStep = shoot.horizontalMax / (shoot.distance / shoot.speed);
                 }
                 gameState = gameStates.POWERING;
                 break;
