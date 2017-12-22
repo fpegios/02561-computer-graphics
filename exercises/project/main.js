@@ -11,7 +11,7 @@ function initVariables() {
     mvMatrix = [];
     pMatrix = [];
     cameraParams = {x: 0, y: -5.0, z: -20};
-    gameStates = { AIMING: "AIMING", POWERING: "POWERING", AIRTIME: "AIRTIME", COLLISION: "COLLISION"};
+    gameStates = { AIMING: "AIMING", POWERING: "POWERING", AIRTIME: "AIRTIME"};
     gameState = gameStates.AIMING;
 
     // ball
@@ -553,9 +553,6 @@ document.addEventListener("keydown", function(event) {
                 shoot.verticalCurve = (powerbarValue / powerbarScaleRange.max);
                 shoot.verticalStep = (shoot.verticalCurve * shoot.verticalMax) / ( shoot.distance / shoot.speed);
                 gameState = gameStates.AIRTIME;
-                break;
-            case gameStates.COLLISION:
-                gameState = gameStates.AIMING;
                 break;
             default:
         }
