@@ -57,18 +57,30 @@ function initVariables() {
         distance: ball.z - goalPostZ,
         speed: 3.0 
     }; 
+    
+    // terrain
+    terrainScale = 30;
+    terrain = {
+        x: 0,
+        y: -2.35,
+        z: -50
+    }
 
     // score
     score = 0;
     
     // colors
-    white =    [1.0, 1.00, 1.0, 1.0];
-    red =      [1.0, 0.00, 0.0, 1.0];
-    orange =   [1.0, 0.35, 0.0, 1.0];
-    yellow =   [1.0, 0.80, 0.0, 1.0];
-    blue =     [0.0, 0.00, 1.0, 1.0];
-    green =    [0.0, 1.00, 0.0, 1.0];
-    black =    [0.0, 0.00, 0.0, 1.0];
+    color = {
+        white:        [1.0, 1.00, 1.0, 1.0],
+        red:          [1.0, 0.00, 0.0, 1.0],
+        orange:       [1.0, 0.35, 0.0, 1.0],
+        yellow:       [1.0, 0.80, 0.0, 1.0],
+        blue:         [0.0, 0.00, 1.0, 1.0],
+        green:        [0.0, 1.00, 0.0, 1.0],
+        black:        [0.0, 0.00, 0.0, 1.0],
+        darkGreen:    [0.0, 0.39, 0.0, 1.0]
+    }
+    
 }
 
 function initCubeBuffer() {
@@ -283,7 +295,7 @@ function drawBall() {
     mvMatrix[3] = mult(mvMatrix[3], translate([ball.x, ball.y, ball.z]));
     mvMatrix[3] = mult(mvMatrix[3], scalem([0.75, 0.75, 0.75]));
 
-    setMatrixUniforms(3, white);
+    setMatrixUniforms(3, color.white);
     for( var i = 0; i < index; i += 3) {
         gl.drawArrays( gl.TRIANGLES, i, 3 );  
     }
@@ -303,19 +315,19 @@ function drawGoalPost() {
     mvMatrix[0] = camera;
     mvMatrix[0] = mult(mvMatrix[0], translate([-goalPostWidth / 2, 12, goalPostZ]));
     mvMatrix[0] = mult(mvMatrix[0], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
-    setMatrixUniforms(0, white);
+    setMatrixUniforms(0, color.white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[1] = camera;
     mvMatrix[1] = mult(mvMatrix[1], translate([goalPostWidth / 2, 12, goalPostZ]));
     mvMatrix[1] = mult(mvMatrix[1], scalem([crossbarScaleWidth, crossbarScaleHeight, 0.25]));
-    setMatrixUniforms(1, white);
+    setMatrixUniforms(1, color.white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     mvMatrix[2] = camera;
     mvMatrix[2] = mult(mvMatrix[2], translate([0, (crossbarScaleHeight - 1.25) + 12  , goalPostZ]));
     mvMatrix[2] = mult(mvMatrix[2], scalem([goalPostWidth / 2, crossbarScaleWidth, 0.25]));
-    setMatrixUniforms(2, white);
+    setMatrixUniforms(2, color.white);
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -332,7 +344,7 @@ function drawTargets() {
     mvMatrix[4] = camera;
     mvMatrix[4] = mult(mvMatrix[4], translate([target.x, target.y, target.z]));
     mvMatrix[4] = mult(mvMatrix[4], scalem([targetScale, targetScale, 1 ]));
-    setMatrixUniforms(4, red);
+    setMatrixUniforms(4, color.red);
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -349,7 +361,7 @@ function drawArrow() {
     mvMatrix[5] = camera;
     mvMatrix[5] = mult(mvMatrix[5], rotate(arrowAngle, [0, 0, 1]));
     mvMatrix[5] = mult(mvMatrix[5], translate([arrow.x, arrow.y, arrow.z]));
-    setMatrixUniforms(5, green);
+    setMatrixUniforms(5, color.yellow);
     gl.drawElements(gl.TRIANGLES, arrowIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -366,13 +378,31 @@ function drawPowerBar() {
     mvMatrix[5] = camera;
     mvMatrix[5] = mult(mvMatrix[5], translate([powerbar.x, powerbar.y, powerbar.z]));
     mvMatrix[5] = mult(mvMatrix[5], scalem([powerbarValue, powerbarScale.y, powerbarScale.z]));
-    setMatrixUniforms(5, red);
-
+    setMatrixUniforms(5, color.red);
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
     mvMatrix[6] = camera;
     mvMatrix[6] = mult(mvMatrix[6], translate([powerbar.x, powerbar.y, powerbar.z]));
     mvMatrix[6] = mult(mvMatrix[6], scalem([powerbarScale.x, powerbarScale.y, powerbarScale.z]));
-    setMatrixUniforms(6, yellow);
+    setMatrixUniforms(6, color.yellow);
+    gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawTerrain() {
+    // BIND BUFFERS!!!!!!!!!!!!
+    // MUST BE DONE ONCE BEFORE DRAWING AN OBJECT
+    /************************************************/
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
+    gl.vertexAttribPointer(vPosition, squareVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray( vPosition);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);
+    /********************************************************************/
+    
+    mvMatrix[7] = camera;
+    mvMatrix[7] = mult(mvMatrix[7], translate([terrain.x, terrain.y, terrain.z]));
+    mvMatrix[7] = mult(mvMatrix[7], scalem([terrainScale, 1, terrainScale]));
+    mvMatrix[7] = mult(mvMatrix[7], rotate(90, [1, 0, 0]));
+    setMatrixUniforms(7, color.darkGreen);
     gl.drawElements(gl.TRIANGLES, squareIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -384,6 +414,7 @@ function render() {
     drawBall();
     drawGoalPost();    
     drawTargets();
+    drawTerrain();
     if (gameState == gameStates.AIMING) {
         drawArrow();
     }
