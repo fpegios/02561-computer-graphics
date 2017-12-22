@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Exercise 8.1</title>
+
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css" rel="stylesheet">
+    
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
+    <script src="/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="/lib/OBJParser.js"></script>
+    <script type="text/javascript" src="week08p01.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec4 a_position;
+        attribute vec2 a_textureCoords;
+        
+        varying vec2 v_textureCoords;
+        
+        uniform mat4 u_modelView, u_projection;
+        
+        void main() {
+            v_textureCoords = a_textureCoords;
+            gl_Position = u_projection * u_modelView * a_position;
+        }               
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec2 v_textureCoords;
+        
+        uniform sampler2D u_texture;
+        
+        void main() {
+            gl_FragColor = texture2D(u_texture, v_textureCoords);
+        }                   
+    </script>
+
+    <script id="phong-vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec3 a_position_model, a_normal_model;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        
+        uniform mat4 u_normal, u_modelView, u_projection;
+        uniform vec3 u_light_world;
+        
+        void main() {
+            vec3 position_camera = (u_modelView * vec4(a_position_model, 0)).xyz;
+            v_light_camera = (u_modelView * vec4(u_light_world, 0)).xyz;
+            v_eye_camera = position_camera;
+            v_normal_camera = (u_normal * vec4(a_normal_model, 0)).xyz;
+            
+            gl_Position = u_projection * u_modelView * vec4(a_position_model, 1.0);
+        }
+    </script>
+
+    <script id="phong-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        
+        void main() {
+            vec3 n = normalize(v_normal_camera);
+            vec3 l = normalize(v_light_camera);
+            vec3 e = normalize(v_eye_camera);
+            vec3 r = normalize(2.0 * dot(l, n) * n - l);
+        
+            // Pearl material
+            vec3 ka = vec3(0.25, 0.20725, 0.20725);
+            vec3 ks = vec3(0.296648, 0.296648, 0.296648);
+            vec3 kd = vec3(1, 0.829, 0.829);
+            float shininess = 11.264;
+            
+            vec3 ambient = ka;
+            
+            float cosAngle = dot(l, n);
+            vec3 diffuse = kd * max(cosAngle, 0.0);
+        
+            vec3 specular = ks * pow(max(dot(r, e), 0.0), shininess);
+        
+            if (cosAngle < 0.0) {
+                specular = vec3(0.0);
+            }
+        
+            gl_FragColor = vec4((ambient + diffuse + specular), 1.0);
+        }                          
+    </script>
+</head>
+
+<body>
+    <canvas id="gl-canvas" width="512" height="512">
+        Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week07/week07p04.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 7.4</a>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <button class="btn btn-default"></span> EX - 8.1</button>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week08/week08p02.html" type="button" class="btn btn-primary">EX - 8.2 <span class="glyphicon glyphicon-menu-right"></span></a>
+        </div>
+    </div>
+    <br/>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-offset-3 col-xs-1" align="center">
+            <button class="btn btn-primary" id="toggle-teapot">Teapot</button>
+        </div>
+        <div class="col-xs-offset-1 col-xs-1" align="center">
+            <button class="btn btn-primary" id="toggle-light">Light</button>
+        </div>
+    </div>
+</body>
+</html>

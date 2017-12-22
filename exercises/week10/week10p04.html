@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Exercise 10.4</title>
+
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css" rel="stylesheet">
+    
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
+    <script src="/node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="/lib/OBJParser.js"></script>
+    <script type="text/javascript" src="week10p04.js"></script>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec4 a_position;
+        
+        varying vec3 v_textureCoords;
+        
+        uniform mat4 u_mvp, u_mtex;
+        
+        void main() {
+            v_textureCoords = (u_mtex * a_position).xyz;
+            gl_Position = u_mvp * a_position;
+        }                                           
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec3 v_textureCoords;
+        
+        uniform samplerCube u_texture;
+        uniform sampler2D u_normal;
+        uniform vec3 u_eye_world;
+        uniform bool u_reflective;
+        
+        float atan2(float y, float x) {
+          return 2.0 * atan((length(vec2(x, y)) - x) / y);
+        }
+        
+        vec3 rotate_to_normal(vec3 normal, vec3 v) {
+            float a = 1.0/(1.0 + normal.z);
+            float b = -normal.x*normal.y*a;
+            return vec3(1.0 - normal.x*normal.x*a, b, -normal.x)*v.x
+                + vec3(b, 1.0 - normal.y*normal.y*a, -normal.y)*v.y
+                + normal*v.z;
+        }
+        
+        void main() {
+            float pi = 3.1415926;
+            vec3 position_world = v_textureCoords;
+            vec3 normal = v_textureCoords;
+            vec3 textureCoords = v_textureCoords;
+            if (u_reflective) {
+                float u = 0.5 + atan2(normal.z, - normal.x) / (2.0 * pi);
+                float v = 0.5 - (asin(normal.y) / pi);
+                vec3 normal_tangent = texture2D(u_normal, vec2(u, v)).xyz * 2.0 - 1.0;
+                normal = rotate_to_normal(normal, normal_tangent);
+                vec3 incident = position_world - u_eye_world;
+                normal = reflect(incident, normal);
+                gl_FragColor = textureCube(u_texture, normal);
+            } else {
+                gl_FragColor = textureCube(u_texture, textureCoords);
+            }
+        }                                              
+    </script>
+
+</head>
+
+<body>
+    <canvas id="gl-canvas" width="512" height="512">
+        Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    <div class="row" style="width: 512px">
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week10/week10p03.html" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-menu-left"></span> EX - 10.3</a>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <button class="btn btn-default"></span> EX - 10.4</button>
+        </div>
+        <div class="col-xs-offset-1 col-xs-2" align="center">
+            <a href="/exercises/week10/week10p04.html" type="button" class="btn btn-primary">EX - 10.4 <span class="glyphicon glyphicon-menu-right"></span></a>
+        </div>
+    </div>
+</body>
+</html>

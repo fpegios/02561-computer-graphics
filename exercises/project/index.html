@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Kicker</title>
+
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap3/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="/lib/initShaders.js"></script>
+    <script type="text/javascript" src="/lib/MV.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+    
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        //attributes for the vertex shader (different for every thread/core that will execute a copy of this)
+        attribute vec3 vPosition;
+        uniform vec4 color;
+
+        //Variable to be forwarded to the corresponding thread of the fragment shader
+        varying vec4 vColor;
+
+        //ModelView and Projection Matrices
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        
+        void main(void) {
+            //Each vertex is multiplied with the ModelView and Projection matrices and created a fragment
+            gl_Position = uPMatrix * uMVMatrix * vec4(vPosition, 1.0);
+            //Its color is forwarded to the fragment shader
+            vColor = color;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        //necessary code for compatibility
+        precision mediump float;
+
+        //Variable coming from the vertex shader
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_FragColor = vColor;
+        }
+    </script>
+</head>
+
+<body onload="WebGLStart()">
+    <canvas id="gl-canvas"width="800" height="600" align="center">
+        Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    <div id="score"></div>
+</body>
+</html>
