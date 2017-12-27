@@ -264,6 +264,36 @@ function initSphereBuffer() {
     gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
 }
 
+function initHammer() {
+    var square = document.querySelector('body');
+    var manager = new Hammer.Manager(square);
+    var Tap = new Hammer.Tap({
+        taps: 1
+    });
+    manager.add(Tap);
+
+    manager.on('tap', function(e) {
+        switch(gameState) {
+            case gameStates.AIMING:
+                if (arrowAngle >= 0) { 
+                    shoot.horizontalMax = -arrowAngle;
+                    shoot.horizontalStep = shoot.horizontalMax / (shoot.distance / shoot.speed);
+                } else {
+                    shoot.horizontalMax = -arrowAngle;
+                    shoot.horizontalStep = shoot.horizontalMax / (shoot.distance / shoot.speed);
+                }
+                gameState = gameStates.POWERING;
+                break;
+            case gameStates.POWERING:
+                shoot.verticalCurve = (powerbarValue / powerbarScaleRange.max);
+                shoot.verticalStep = (shoot.verticalCurve * shoot.verticalMax) / ( shoot.distance / shoot.speed);
+                gameState = gameStates.AIRTIME;
+                break;
+            default:
+        }
+    });
+}
+
 function defineTarget() {
     target = {x: (Math.random() * (targetRange.maxX - targetRange.minX + 1)) + targetRange.minX, y: (Math.random() * (targetRange.maxY - targetRange.minY + 1)) + targetRange.minY, z: goalPostZ};
 }
@@ -531,6 +561,7 @@ function WebGLStart() {
     initCubeBuffer();
     initSquareBuffer();
     initArrowBuffer()
+    initHammer();
     
     defineTarget();    
     update();
