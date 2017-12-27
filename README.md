@@ -1,10 +1,9 @@
-# CNTO
+# 02561-computer-graphics
 
 ## Instructions
 
 ### Prerequisites
   - NodeJS
-  - Set Google Chrome to use touch sensors (Touch: Force Enabled)
 
 Execute the following command to load dependencies:
 ```sh
